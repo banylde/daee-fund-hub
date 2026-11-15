@@ -1,0 +1,315 @@
+{
+  "disclaimer": "模拟盘试跑期，非投资建议。虚拟资金 500 万，不接券商，不动真钱。",
+  "status": "not_started",
+  "started": false,
+  "reason": "建账日之后没有交易日，未产生净值",
+  "start_date": "2026-11-16",
+  "asof": null,
+  "updated_at": "2026-11-15 14:27",
+  "timezone": "Asia/Shanghai",
+  "currency": "CNY",
+  "initial_cash": 5000000,
+  "nav": null,
+  "equity": null,
+  "hub_cash": 0,
+  "drawdown": null,
+  "max_drawdown": null,
+  "peak_nav": null,
+  "weights": [
+    {
+      "id": "shan",
+      "name": "五绝归山",
+      "board": "山部",
+      "url": "https://banylde.github.io/daee-shan-equity/",
+      "target": 0.3,
+      "band": 0.05,
+      "low": 0.25,
+      "high": 0.35,
+      "weight": null,
+      "equity": null,
+      "nav": null,
+      "cash": null,
+      "contribution": null,
+      "official": {
+        "asof": "2026-11-13",
+        "holdings": [
+          {
+            "code": "603605",
+            "name": "珀莱雅",
+            "weight": 22.5,
+            "kind": "ashare_stock",
+            "market": "sh"
+          },
+          {
+            "code": "06862",
+            "name": "海底捞",
+            "weight": 22.5,
+            "kind": "hk_stock",
+            "market": "hk"
+          },
+          {
+            "code": "03998",
+            "name": "波司登",
+            "weight": 22.5,
+            "kind": "hk_stock",
+            "market": "hk"
+          },
+          {
+            "code": "601528",
+            "name": "瑞丰银行",
+            "weight": 10.0,
+            "kind": "ashare_stock",
+            "market": "sh"
+          },
+          {
+            "code": "300750",
+            "name": "宁德时代",
+            "weight": 22.5,
+            "kind": "ashare_stock",
+            "market": "sz"
+          }
+        ],
+        "changes": []
+      }
+    },
+    {
+      "id": "fire",
+      "name": "四王盗火",
+      "board": "火部",
+      "url": "https://banylde.github.io/daee-fire-theme/",
+      "target": 0.3,
+      "band": 0.05,
+      "low": 0.25,
+      "high": 0.35,
+      "weight": null,
+      "equity": null,
+      "nav": null,
+      "cash": null,
+      "contribution": null,
+      "official": {
+        "asof": "2026-11-13",
+        "holdings": [],
+        "changes": [
+          "没有题材同时通过催化、梯队、容量、天数",
+          "情绪退潮，新开仓压到半仓以下（最多1只、7.5%）",
+          "四王留空，不凑数"
+        ]
+      }
+    },
+    {
+      "id": "feng",
+      "name": "八友御风",
+      "board": "风部",
+      "url": "https://banylde.github.io/daee-feng-etf/",
+      "target": 0.2,
+      "band": 0.05,
+      "low": 0.15000000000000002,
+      "high": 0.25,
+      "weight": null,
+      "equity": null,
+      "nav": null,
+      "cash": null,
+      "contribution": null,
+      "official": {
+        "asof": "2026-11-13",
+        "holdings": [
+          {
+            "code": "512800",
+            "name": "银行ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh"
+          },
+          {
+            "code": "159928",
+            "name": "消费ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sz"
+          },
+          {
+            "code": "512690",
+            "name": "酒ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh"
+          },
+          {
+            "code": "159825",
+            "name": "农业ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sz"
+          },
+          {
+            "code": "512980",
+            "name": "传媒ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh"
+          },
+          {
+            "code": "512170",
+            "name": "医疗ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh"
+          },
+          {
+            "code": "159996",
+            "name": "家电ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sz"
+          },
+          {
+            "code": "516110",
+            "name": "汽车ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh"
+          }
+        ],
+        "changes": [
+          "家电ETF(68.6) 替换 医药ETF(51.4)"
+        ]
+      }
+    },
+    {
+      "id": "lin",
+      "name": "六仙出林",
+      "board": "林部",
+      "url": "https://banylde.github.io/daee-lin-fund/",
+      "target": 0.2,
+      "band": 0.05,
+      "low": 0.15000000000000002,
+      "high": 0.25,
+      "weight": null,
+      "equity": null,
+      "nav": null,
+      "cash": null,
+      "contribution": null,
+      "official": {
+        "asof": "2026-11-09",
+        "holdings": [
+          {
+            "code": "006864",
+            "name": "国联安核心资产策略混合",
+            "weight": 12.6,
+            "kind": "fund",
+            "market": "fund"
+          },
+          {
+            "code": "202019",
+            "name": "南方策略优化混合",
+            "weight": 16.8,
+            "kind": "fund",
+            "market": "fund"
+          },
+          {
+            "code": "005094",
+            "name": "万家臻选混合A",
+            "weight": 10.6,
+            "kind": "fund",
+            "market": "fund"
+          },
+          {
+            "code": "160613",
+            "name": "鹏华盛世创新混合(LOF)A",
+            "weight": 26.3,
+            "kind": "fund",
+            "market": "fund"
+          },
+          {
+            "code": "002152",
+            "name": "华宝核心优势混合A",
+            "weight": 9.6,
+            "kind": "fund",
+            "market": "fund"
+          },
+          {
+            "code": "012060",
+            "name": "富国全球消费精选混合(QDII)人民币A",
+            "weight": 24.2,
+            "kind": "fund",
+            "market": "fund"
+          }
+        ],
+        "changes": [
+          "首次建立",
+          "海外：规则改动后补入富国全球消费精选混合(QDII)人民币A（2026-11-09）"
+        ]
+      }
+    }
+  ],
+  "contribution": {},
+  "curves": [],
+  "benchmarks": {
+    "primary": {
+      "id": "hs300tr",
+      "name": "沪深300全收益"
+    },
+    "secondary": {
+      "id": "equity_fund",
+      "name": "中证偏股基金指数"
+    }
+  },
+  "logs": [],
+  "trades": [],
+  "links": [
+    {
+      "id": "shan",
+      "name": "五绝归山",
+      "board": "山部",
+      "url": "https://banylde.github.io/daee-shan-equity/"
+    },
+    {
+      "id": "fire",
+      "name": "四王盗火",
+      "board": "火部",
+      "url": "https://banylde.github.io/daee-fire-theme/"
+    },
+    {
+      "id": "feng",
+      "name": "八友御风",
+      "board": "风部",
+      "url": "https://banylde.github.io/daee-feng-etf/"
+    },
+    {
+      "id": "lin",
+      "name": "六仙出林",
+      "board": "林部",
+      "url": "https://banylde.github.io/daee-lin-fund/"
+    }
+  ],
+  "drawdown_delever": {
+    "enabled": true,
+    "note": "R1 档位，2026-11-15 鹅哥授权青桐定仓位控制后启用；降仓差额临时留现金，收复一半回撤后恢复。"
+  },
+  "rules": {
+    "fill": "收盘出信号，次日开盘成交；基金按次日单位净值。",
+    "costs": "佣金万 3、滑点 0.1%；A 股股票卖出印花税 0.05%；ETF 与场外基金不收印花税。",
+    "t_plus": "A 股、ETF、场外基金 T+1 可卖；港股当日可卖。卖出资金当日可用。",
+    "rebalance": "季末检查；任一部偏离目标超过允许区间则拉回目标。"
+  },
+  "sources": [
+    "四个看板公开 JSON",
+    "eastmoney-lsjz",
+    "tencent-kline",
+    "tencent-kline",
+    "tencent-fx-spot",
+    "eastmoney-kline",
+    "eastmoney-kline",
+    "shan latest.fx"
+  ],
+  "gaps": [
+    {
+      "reason": "沪深300全收益暂不可用，已改用 000300 沪深300价格指数。短窗口分红差可忽略，长窗口会低估基准。"
+    },
+    {
+      "reason": "火部 paper.json 虚拟资金为 1000000 元，总账户按目标权重使用 1500000 元，未按比例放大其持仓，而是按正式名单自行记账。"
+    }
+  ],
+  "pending_macro": false,
+  "pending_sleeve": {}
+}

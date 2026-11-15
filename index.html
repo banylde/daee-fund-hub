@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>大鹅基金模拟盘</title>
+<meta name="theme-color" content="#0f1115"><link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg"><link rel="apple-touch-icon" href="icons/icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="大鹅基金">
+<style>
+/* unslop by Damir Sokolovsky (@heydamir), CC BY 4.0 — 大鹅基金看板家族样式 */
+:root{--bg:#121213;--card:#18181a;--raised:#212124;--line:rgba(237,237,237,.08);--fg:#ededed;--sec:#a1a1a6;--mute:#85858b;--up:#e5484d;--dn:#3fb37f;
+--serif:"Noto Serif CJK SC","Songti SC","STSong",serif;--sans:-apple-system,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;--mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;--ease:cubic-bezier(.22,1,.36,1);
+--acc:#e2d3a8;--acc-ink:#efe4c4;--shan:#c8a464;--lin:#6fb38a;--feng:#7fa7d9;--fire:#f0a36a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+.page{max-width:1440px;margin:0 auto;padding:32px 32px calc(32px + env(safe-area-inset-bottom))}
+header.mast{display:flex;align-items:flex-start;gap:16px;padding-bottom:24px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.seal{flex:none;width:44px;height:44px;border-radius:6px;background:var(--acc);color:#121213;font:500 26px/44px var(--serif);text-align:center}
+.brand{font-size:13px;color:var(--sec);line-height:20px}
+h1{font:500 28px/1.2 var(--serif);margin:0 0 4px;letter-spacing:.02em}
+h2{font-size:15px;font-weight:500;margin:0 0 12px;line-height:22px}
+.mute{color:var(--mute);font-size:12px;line-height:18px}
+#meta{font-family:var(--mono),var(--sans);font-size:12px;color:var(--mute);margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:0 0 16px}
+.disclaimer{border:1px solid var(--acc);background:rgba(226,211,168,.08);padding:16px 20px;margin:0 0 16px;border-radius:12px;font:500 16px/1.5 var(--serif);color:var(--acc-ink)}
+.disclaimer b{font-weight:600;letter-spacing:.04em}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.kpi .lab{font-size:12px;color:var(--mute)}
+.kpi .val{font-family:var(--mono),var(--sans);font-size:22px;line-height:32px;margin-top:4px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.chartbox{position:relative;min-height:260px}
+.lw-host{height:228px;width:100%}
+.placeholder{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--sec);text-align:center;border:1px dashed var(--line);border-radius:12px;background:var(--raised);padding:24px}
+.placeholder strong{color:var(--acc);font:500 18px/1.4 var(--serif)}
+svg.chart{width:100%;height:228px;display:block;background:var(--raised);border-radius:8px}
+.readout{font-family:var(--mono),var(--sans);font-size:12px;color:var(--mute);margin-top:8px;min-height:18px}
+.legend{display:flex;flex-wrap:wrap;gap:12px 16px;margin-top:8px;font-size:12px;color:var(--sec)}
+.legend i.swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;height:36px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+th{background:var(--raised);font-weight:400;font-size:12px;color:var(--mute)}
+td{font-family:var(--mono),var(--sans);font-size:13px}
+td.l,th.l{text-align:left}
+.bar{height:8px;background:var(--raised);border-radius:99px;overflow:hidden;position:relative;width:140px;display:inline-block;vertical-align:middle}
+.bar>span{position:absolute;top:0;bottom:0;width:2px;background:var(--fg)}
+.bar>i{position:absolute;top:0;bottom:0;background:var(--acc);opacity:.85}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{display:inline-block;padding:8px 12px;border-radius:8px;border:1px solid var(--line);color:var(--fg);text-decoration:none;background:var(--raised)}
+.links a:hover{border-color:var(--acc)}
+.links a.shan{border-color:rgba(200,164,100,.4)}
+.links a.lin{border-color:rgba(111,179,138,.4)}
+.links a.feng{border-color:rgba(127,167,217,.4)}
+.links a.fire{border-color:rgba(240,163,106,.4)}
+footer{margin-top:24px;color:var(--mute);font-size:12px;line-height:18px}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid var(--line);color:var(--sec);margin-left:6px}
+.warn{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="mast">
+  <div class="seal" aria-hidden="true">总</div>
+  <div>
+    <div class="brand">大鹅基金 · 总览</div>
+    <h1>大鹅基金模拟盘</h1>
+    <div class="mute" id="meta"></div>
+  </div>
+</header>
+<div class="disclaimer" role="note"><b>模拟盘，非投资建议。</b> 虚拟资金，不接券商，不动真钱。四个子组合合成一个总账户，只按公开名单记账。</div>
+<div class="kpis" id="kpis"></div>
+<div class="grid2">
+  <div class="card"><h2>总净值与基准</h2><div class="mute" id="navnote"></div><div class="chartbox" id="navchart"></div></div>
+  <div class="card"><h2>回撤</h2><div class="mute" id="ddnote"></div><div class="chartbox" id="ddchart"></div></div>
+</div>
+<div class="card"><h2>各部贡献与权重</h2><div class="wrap"><table id="wtab"><thead></thead><tbody></tbody></table></div></div>
+<div class="card"><h2>最近操作</h2><div class="mute" id="lognote">有变动才记；无变动的交易日不写。</div><div class="wrap"><table id="logtab"><thead></thead><tbody></tbody></table></div></div>
+<div class="card"><h2>四个看板</h2><div class="links" id="links"></div></div>
+<div class="card mute" id="rule"></div>
+<footer>模拟盘是虚拟资金，不连接券商。仓库内没有账户、密钥或真实持仓。图表库为 TradingView Lightweight Charts™ 5.3.0（Apache-2.0），本地引入，失败时回退为页面内置 SVG。<a href="https://www.tradingview.com/" style="color:var(--sec)">tradingview.com</a></footer>
+</div>
+<script src="vendor/lightweight-charts/lightweight-charts.standalone.production.js" onerror="window.__lwChartsFailed=1"></script>
+<script>
+const ACC={shan:"#c8a464",lin:"#6fb38a",feng:"#7fa7d9",fire:"#f0a36a"};
+const fmtN=v=>v==null?"—":Number(v).toFixed(4);
+const fmtP=v=>v==null?"—":(Number(v)*100).toFixed(2)+"%";
+const fmtY=v=>v==null?"—":Number(v).toLocaleString("zh-CN",{maximumFractionDigits:0});
+const cls=v=>v==null?"":(v>0?"up":v<0?"dn":"");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+function placeholder(el, alloc){
+  const rows=(alloc||[]).map(w=>`${esc(w.name)} ${(w.target*100).toFixed(0)}%（允许 ${(w.low*100).toFixed(0)}–${(w.high*100).toFixed(0)}%）`).join("<br>");
+  el.innerHTML=`<div class="placeholder"><strong>模拟尚未开始</strong><div class="mute">建账日后才会出现净值曲线，不绘制任何虚构走势。</div><div>${rows}</div></div>`;
+}
+
+function lwReady(){
+  const L=window.LightweightCharts;
+  return !window.__lwChartsFailed&&!!(L&&typeof L.createChart==="function"&&L.LineSeries&&L.ColorType&&L.CrosshairMode&&L.LineStyle);
+}
+
+function svgChart(box,dates,series,mode){
+  const w=640,h=228,pl=8,pr=8,pt=12,pb=20;
+  const vals=series.flatMap(s=>s.values.filter(v=>typeof v==="number"));
+  let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(mode==="dd"){hi=0;if(!(lo<0))lo=-0.01}
+  if(hi===lo){hi+=0.01;lo-=0.01}
+  const X=i=>pl+i*(w-pl-pr)/Math.max(1,dates.length-1);
+  const Y=v=>pt+(hi-v)/(hi-lo)*(h-pt-pb);
+  const lines=series.map(s=>{
+    const d=s.values.map((v,i)=>typeof v==="number"?`${i?"L":"M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`:"").join(" ");
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+  }).join("");
+  const legend=series.map(s=>`<span><i class="swatch" style="background:${s.color}"></i>${esc(s.name)}</span>`).join("");
+  box.innerHTML=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${mode==="dd"?"回撤":"净值"}">${lines}</svg><div class="readout">图表库不可用，已改用页面内置曲线</div><div class="legend">${legend}</div>`;
+}
+
+function mountLw(box,dates,series,mode){
+  const L=window.LightweightCharts;
+  box.replaceChildren();
+  const host=document.createElement("div");
+  host.className="lw-host";
+  const readout=document.createElement("div");
+  readout.className="readout";
+  readout.textContent="在图上移动查看当日数值";
+  const legend=document.createElement("div");
+  legend.className="legend";
+  const fmt=mode==="dd"?fmtP:fmtN;
+  series.forEach(s=>{
+    const item=document.createElement("span");
+    const mark=document.createElement("i");
+    mark.className="swatch";mark.style.background=s.color;
+    const last=s.values.filter(v=>typeof v==="number").slice(-1)[0];
+    item.append(mark,document.createTextNode(s.name+" "+(typeof last==="number"?fmt(last):"—")));
+    legend.appendChild(item);
+  });
+  box.append(host,readout,legend);
+  const chart=L.createChart(host,{
+    autoSize:typeof ResizeObserver==="function",
+    width:Math.max(1,Math.round(host.clientWidth||box.clientWidth||320)),
+    height:228,
+    layout:{background:{type:L.ColorType.Solid,color:"#212124"},textColor:"#85858b",fontFamily:"ui-monospace,monospace",fontSize:11,attributionLogo:true},
+    grid:{vertLines:{visible:false},horzLines:{color:"rgba(237,237,237,.08)"}},
+    crosshair:{mode:L.CrosshairMode.Magnet,vertLine:{color:"rgba(237,237,237,.45)",width:1,style:L.LineStyle.Solid,labelBackgroundColor:"#18181a"},horzLine:{color:"rgba(237,237,237,.45)",width:1,style:L.LineStyle.Solid,labelBackgroundColor:"#18181a"}},
+    rightPriceScale:{borderColor:"rgba(237,237,237,.08)"},
+    leftPriceScale:{visible:false},
+    timeScale:{borderColor:"rgba(237,237,237,.08)",timeVisible:false,rightOffset:0,fixLeftEdge:true,fixRightEdge:true},
+    localization:{locale:"zh-CN",dateFormat:"yyyy-MM-dd"},
+    handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
+    handleScale:{mouseWheel:true,pinch:true,axisPressedMouseMove:true}
+  });
+  const priceFormat=mode==="dd"
+    ?{type:"custom",minMove:0.0001,formatter:v=>(Number(v)*100).toFixed(1)+"%"}
+    :{type:"price",precision:4,minMove:0.0001};
+  const apis=series.map(s=>{
+    const api=chart.addSeries(L.LineSeries,{color:s.color,lineWidth:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:true,crosshairMarkerRadius:3,priceFormat,baseLineVisible:false});
+    const data=[];
+    dates.forEach((d,i)=>{const v=s.values[i];if(typeof v==="number"&&Number.isFinite(v))data.push({time:d,value:v});});
+    api.setData(data);
+    return api;
+  });
+  chart.subscribeCrosshairMove(param=>{
+    if(!param||param.time==null){readout.textContent="在图上移动查看当日数值";return;}
+    const t=typeof param.time==="string"?param.time:param.time;
+    const day=typeof t==="object"?t.year+"-"+String(t.month).padStart(2,"0")+"-"+String(t.day).padStart(2,"0"):t;
+    const i=dates.indexOf(day);
+    readout.textContent=day+"  "+series.map(s=>s.name+" "+(i>=0&&typeof s.values[i]==="number"?fmt(s.values[i]):"—")).join("   ");
+  });
+}
+
+function drawChart(box,dates,series,mode){
+  if(!dates.length||!series.length){box.innerHTML="";return;}
+  try{
+    if(lwReady()) mountLw(box,dates,series,mode);
+    else svgChart(box,dates,series,mode);
+  }catch(e){svgChart(box,dates,series,mode);}
+}
+
+function render(d){
+  const started=!!d.started;
+  const w=d.weights||[];
+  document.getElementById("meta").textContent=started
+    ?`建账 ${d.start_date} · 数据日期 ${d.asof||"—"} · 更新于 ${d.updated_at}（北京时间）`
+    :`尚未建账 · 更新于 ${d.updated_at||"—"}（北京时间）`;
+  const nav=d.nav, ret=nav==null?null:nav-1, dd=d.drawdown, mdd=d.max_drawdown;
+  document.getElementById("kpis").innerHTML=started?`
+    <div class="kpi"><div class="lab">总净值</div><div class="val">${fmtN(nav)}</div></div>
+    <div class="kpi"><div class="lab">累计收益</div><div class="val ${cls(ret)}">${fmtP(ret)}</div></div>
+    <div class="kpi"><div class="lab">当前回撤</div><div class="val ${dd<0?"dn":""}">${fmtP(dd)}</div></div>
+    <div class="kpi"><div class="lab">最大回撤</div><div class="val ${mdd<0?"dn":""}">${fmtP(mdd)}</div></div>
+    <div class="kpi"><div class="lab">总权益</div><div class="val">${fmtY(d.equity)} 元</div></div>`
+    :`<div class="kpi"><div class="lab">状态</div><div class="val">尚未建账</div></div>
+      <div class="kpi"><div class="lab">虚拟资金</div><div class="val">${fmtY(d.initial_cash)} 元</div></div>
+      <div class="kpi"><div class="lab">净值</div><div class="val">—</div></div>
+      <div class="kpi"><div class="lab">回撤</div><div class="val">—</div></div>`;
+
+  const navbox=document.getElementById("navchart");
+  const ddbox=document.getElementById("ddchart");
+  if(!started || !(d.curves||[]).length){
+    document.getElementById("navnote").textContent="";
+    document.getElementById("ddnote").textContent="";
+    placeholder(navbox,w);
+    placeholder(ddbox,w);
+  }else{
+    const dates=d.curves.map(r=>r.date);
+    const prim=d.benchmarks&&d.benchmarks.primary;
+    const sec=d.benchmarks&&d.benchmarks.secondary;
+    const series=[{name:"大鹅基金",color:"#e2d3a8",values:d.curves.map(r=>r.nav)}];
+    if(prim) series.push({name:prim.name||"沪深300全收益",color:"#a1a1a6",values:d.curves.map(r=>r.hs300tr)});
+    if(sec) series.push({name:sec.name||"中证偏股基金",color:"#8eb6ff",values:d.curves.map(r=>r.equity_fund)});
+    document.getElementById("navnote").textContent="净值从建账日定为 1。基准按同一日定基。";
+    document.getElementById("ddnote").textContent="回撤相对建账以来的净值高点。";
+    drawChart(navbox,dates,series,"nav");
+    drawChart(ddbox,dates,[{name:"回撤",color:"#e5484d",values:d.curves.map(r=>r.drawdown)}],"dd");
+  }
+
+  const thead=document.querySelector("#wtab thead");
+  const tb=document.querySelector("#wtab tbody");
+  thead.innerHTML=`<tr><th class="l">子组合</th><th>目标</th><th>允许区间</th><th>当前权重</th><th>净值</th><th>权益</th><th>贡献</th><th class="l">区间位置</th></tr>`;
+  tb.innerHTML=w.map(row=>{
+    const cur=row.weight, mid=row.low, span=(row.high-row.low)||0.1;
+    const left=cur==null?null:Math.max(0,Math.min(100,((cur-row.low)/span)*100));
+    const tgt=((row.target-row.low)/span)*100;
+    const bar=cur==null?"":`<span class="bar"><i style="left:0;width:${left}%;background:${ACC[row.id]||"#e2d3a8"}"></i><span style="left:${tgt}%"></span></span>`;
+    return `<tr>
+      <td class="l">${esc(row.board||"")} ${esc(row.name)}</td>
+      <td>${(row.target*100).toFixed(0)}%</td>
+      <td>${(row.low*100).toFixed(0)}%–${(row.high*100).toFixed(0)}%</td>
+      <td>${fmtP(cur)}</td>
+      <td>${fmtN(row.nav)}</td>
+      <td>${fmtY(row.equity)}</td>
+      <td class="${cls(row.contribution)}">${fmtP(row.contribution)}</td>
+      <td class="l">${bar}</td></tr>`;
+  }).join("");
+
+  const logs=(d.logs||[]).slice(-10).reverse();
+  document.querySelector("#logtab thead").innerHTML=`<tr><th class="l">日期</th><th class="l">类型</th><th class="l">说明</th><th class="l">状态</th></tr>`;
+  document.querySelector("#logtab tbody").innerHTML=logs.length?logs.map(lg=>`<tr>
+    <td class="l">${esc(lg.date||"")}</td>
+    <td class="l">${esc({sleeve_trade:"子组合调仓",rebalance:"大类再平衡",risk:"风控"}[lg.type]||lg.type||"")}</td>
+    <td class="l">${esc(lg.reason||"")}${lg.sleeve?" · "+esc(lg.sleeve):""}</td>
+    <td class="l">${esc(lg.status||"")}</td></tr>`).join(""):`<tr><td class="l" colspan="4">${started?"暂无操作记录":"尚未建账，没有操作。"}</td></tr>`;
+
+  document.getElementById("links").innerHTML=(d.links||[]).map(x=>`<a class="${esc(x.id)}" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.board||"")} ${esc(x.name)}</a>`).join("");
+  const gaps=(d.gaps||[]).map(g=>g.reason||g).filter(Boolean);
+  const ddnote=d.drawdown_delever&&d.drawdown_delever.enabled?"回撤降仓已启用。":"回撤降仓规则尚未生效（配置为关闭）。";
+  const r=d.rules||{};
+  document.getElementById("rule").innerHTML=`<h2>口径</h2>
+    <p>${esc(r.fill||"")} ${esc(r.costs||"")} ${esc(r.t_plus||"")} ${esc(r.rebalance||"")} ${ddnote}</p>
+    ${gaps.length?`<p class="warn">数据缺口：${gaps.map(esc).join("；")}</p>`:""}
+    <p>来源：${esc((d.sources||[]).join(" / ")||"—")}</p>`;
+}
+
+fetch("data/summary.json",{cache:"no-store"}).then(r=>{
+  if(!r.ok) throw new Error("summary "+r.status);
+  return r.json();
+}).then(render).catch(err=>{
+  document.getElementById("meta").textContent="无法读取 data/summary.json（"+err.message+"）。若在本地打开文件，请先在本目录运行 python3 -m http.server。";
+  placeholder(document.getElementById("navchart"),[]);
+  placeholder(document.getElementById("ddchart"),[]);
+});
+</script>
+</body></html>

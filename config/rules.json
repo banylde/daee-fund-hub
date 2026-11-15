@@ -1,0 +1,180 @@
+{
+  "disclaimer": "模拟盘试跑期，非投资建议。虚拟资金 500 万，不接券商，不动真钱。",
+  "start_date": "2026-11-16",
+  "currency": "CNY",
+  "initial_cash": 5000000,
+  "sleeves": {
+    "shan": {
+      "id": "shan",
+      "name": "五绝归山",
+      "board": "山部",
+      "target": 0.3,
+      "band": 0.05,
+      "url": "https://banylde.github.io/daee-shan-equity/"
+    },
+    "fire": {
+      "id": "fire",
+      "name": "四王盗火",
+      "board": "火部",
+      "target": 0.3,
+      "band": 0.05,
+      "url": "https://banylde.github.io/daee-fire-theme/"
+    },
+    "feng": {
+      "id": "feng",
+      "name": "八友御风",
+      "board": "风部",
+      "target": 0.2,
+      "band": 0.05,
+      "url": "https://banylde.github.io/daee-feng-etf/"
+    },
+    "lin": {
+      "id": "lin",
+      "name": "六仙出林",
+      "board": "林部",
+      "target": 0.2,
+      "band": 0.05,
+      "url": "https://banylde.github.io/daee-lin-fund/"
+    }
+  },
+  "costs": {
+    "commission": 0.0003,
+    "slippage": 0.001,
+    "stamp_sell": 0.0005,
+    "stamp_applies_to": [
+      "ashare_stock"
+    ]
+  },
+  "fill": {
+    "signal": "close",
+    "execution": "next_open",
+    "fund_fill": "next_nav",
+    "t_plus_sell": [
+      "ashare_stock",
+      "etf",
+      "fund"
+    ],
+    "sale_proceeds_same_day": true
+  },
+  "rebalance": {
+    "quarter_end_check": true,
+    "band_trigger": true,
+    "pull_to": "target"
+  },
+  "drawdown_delever": {
+    "enabled": true,
+    "note": "R1 档位，2026-11-15 鹅哥授权青桐定仓位控制后启用；降仓差额临时留现金，收复一半回撤后恢复。",
+    "levels": [
+      {
+        "drawdown": 0.1,
+        "action": "warn",
+        "note": "仅预警，不调仓"
+      },
+      {
+        "drawdown": 0.15,
+        "action": "reduce",
+        "targets": {
+          "fire": 0.15,
+          "feng": 0.15
+        },
+        "note": "火部降到 15%，风部降到 15%，差额留现金"
+      },
+      {
+        "drawdown": 0.2,
+        "action": "reduce",
+        "targets": {
+          "fire": 0.05,
+          "feng": 0.1
+        },
+        "note": "火部降到 5%，风部降到 10%，差额留现金"
+      }
+    ],
+    "restore": {
+      "rule": "half_drawdown_recovered",
+      "note": "净值从触发时低点收复该档一半回撤后，恢复战略权重"
+    }
+  },
+  "benchmarks": {
+    "primary": {
+      "id": "hs300tr",
+      "name": "沪深300全收益",
+      "symbols": [
+        {
+          "id": "em:1.H00300",
+          "label": "H00300 沪深300全收益"
+        },
+        {
+          "id": "em:90.H00300",
+          "label": "90.H00300 沪深300全收益"
+        },
+        {
+          "id": "em:1.000300",
+          "label": "000300 沪深300价格指数"
+        },
+        {
+          "id": "qq:sh000300",
+          "label": "腾讯 sh000300 沪深300价格指数"
+        }
+      ]
+    },
+    "secondary": {
+      "id": "equity_fund",
+      "name": "中证偏股基金指数",
+      "symbols": [
+        {
+          "id": "em:90.930950",
+          "label": "930950 中证偏股型基金指数"
+        },
+        {
+          "id": "em:1.930950",
+          "label": "1.930950（后备）"
+        },
+        {
+          "id": "qq:sh930950",
+          "label": "腾讯 sh930950（后备）"
+        }
+      ]
+    }
+  },
+  "sources": {
+    "feng": {
+      "base": "https://banylde.github.io/daee-feng-etf/data",
+      "files": [
+        "latest.json",
+        "official.json",
+        "history.json"
+      ]
+    },
+    "lin": {
+      "base": "https://banylde.github.io/daee-lin-fund/data",
+      "files": [
+        "latest.json",
+        "official.json",
+        "history.json"
+      ]
+    },
+    "fire": {
+      "base": "https://banylde.github.io/daee-fire-theme/data",
+      "files": [
+        "latest.json",
+        "official.json",
+        "history.json",
+        "paper.json"
+      ]
+    },
+    "shan": {
+      "base": "https://banylde.github.io/daee-shan-equity/data",
+      "files": [
+        "latest.json",
+        "official.json",
+        "history.json"
+      ]
+    }
+  },
+  "trial": true,
+  "position_limits": {
+    "single_stock_max_of_total": 0.08,
+    "industry_lookthrough_max_of_total": 0.3,
+    "note": "火部单票上限为总账户 8%；穿透后单一行业不超过 30%（试跑期只监测报告，不强制调仓）"
+  }
+}

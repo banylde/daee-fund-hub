@@ -1,0 +1,9 @@
+{
+  "name": "大鹅基金模拟盘总览",
+  "short_name": "大鹅基金",
+  "display": "standalone",
+  "background_color": "#121213",
+  "theme_color": "#0f1115",
+  "start_url": ".",
+  "icons": [{"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml"}]
+}

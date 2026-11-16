@@ -5,7 +5,7 @@
   "reason": null,
   "start_date": "2026-11-16",
   "asof": "2026-11-16",
-  "updated_at": "2026-11-16 19:18",
+  "updated_at": "2026-11-17 03:57",
   "timezone": "Asia/Shanghai",
   "currency": "CNY",
   "initial_cash": 5000000,
@@ -87,7 +87,7 @@
       "cash": 1500000.0,
       "contribution": 0.0,
       "official": {
-        "asof": "2026-11-13",
+        "asof": "2026-11-16",
         "holdings": [],
         "changes": [
           "没有题材同时通过催化、梯队、容量、天数",

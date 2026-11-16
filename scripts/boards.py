@@ -66,10 +66,11 @@ def _item(code, name, weight, sleeve, market=None, extra=None):
 
 
 def _renorm(items):
+    """只修正接近 100% 的四舍五入误差。合计明显低于 100% 时不放大，以便留下现金。"""
     total = sum(x["weight"] for x in items)
     if total <= 0:
         return items
-    if abs(total - 100.0) > 0.15:
+    if 99.0 <= total <= 101.0 and abs(total - 100.0) > 0.15:
         for x in items:
             x["weight"] = x["weight"] * 100.0 / total
     return items

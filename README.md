@@ -11,7 +11,9 @@
 | 风部 八友御风 | [daee-feng-etf](https://banylde.github.io/daee-feng-etf/) | 20% | 15–25% |
 | 林部 六仙出林 | [daee-lin-fund](https://banylde.github.io/daee-lin-fund/) | 20% | 15–25% |
 
-总虚拟资金 1,000 万元，纯权益，不预留战略现金。火部按 300 万元记账；若其 `paper.json` 仍是 100 万元，本仓库不按比例放大那份持仓，而是按正式名单自行计算。
+总虚拟资金 500 万元，纯权益。火部按 150 万元记账；若其 `paper.json` 仍是 100 万元，本仓库不按比例放大那份持仓，而是按正式名单自行计算。林部若因公司门槛缺席部分风格，对应权重暂留现金，不把其余持仓放大到 100%。
+
+公开页面：https://banylde.github.io/daee-fund-hub/ 。只公开模拟盘，不含真实持仓、账号或凭据。
 
 ## 成交口径
 
@@ -45,6 +47,8 @@ python3 scripts/build.py        # 先自测，再按配置计算并写 data/
 python3 -m http.server 8080     # 浏览 index.html（不要直接用 file:// 拉 JSON）
 ```
 
+本地 `.cache/` 有过期时间：无时间戳的旧缓存不复用，行情日期落后于北京时间当天也会重新抓取。GitHub Actions 使用干净 runner，不持久化该缓存。
+
 只需 Python 3 标准库，没有第三方依赖。自测数据全部放在 `tests/`，不会进入 `data/` 或页面。
 
 `data/summary.json` 供页面展示：总净值、各部净值与权重、贡献、当前回撤和最大回撤、基准、最近操作日志。`data/changes.json` 记录当日调入调出、再平衡和风控触发，供盘后提醒例行做一次比对；无变动时 `has_changes` 为 false。
@@ -61,6 +65,10 @@ python3 -m http.server 8080     # 浏览 index.html（不要直接用 file:// �
 ## 图表
 
 `vendor/lightweight-charts/` 是 TradingView Lightweight Charts™ 5.3.0 官方独立版的原样副本（Apache-2.0），带 LICENSE 和 NOTICE，页面用相对路径加载，不走 CDN。脚本加载失败时，回退到页面内置的 SVG 曲线。
+
+## 林部公司门槛
+
+只纳入混合型基金管理规模前二十名的基金公司旗下基金（统计期与口径见 `config/company_whitelist.json`，当前采用 2026-06-30）。不合格或公司未核实的基金不得新建仓，不强制补满六只。总览引擎在读取公开名单之后会再拦截一次，避免自动任务按旧名单买入。该门槛不改变其他既有准入，也不改写已经发生的模拟成交。
 
 ## 不是什么
 

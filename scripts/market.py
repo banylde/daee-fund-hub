@@ -2,6 +2,7 @@
 # 主源：腾讯财经日 K / 东财基金净值；东财行情、新浪为后备。
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import time
@@ -46,23 +47,57 @@ def get_json(url, **kwargs):
     return json.loads(text)
 
 
-def cache_get(key):
+# 无 TTL 时本地缓存会停在过期行情（曾卡在 2026-11-13）。GitHub Actions 每次干净跑，但仍统一过期。
+CACHE_TTL_SEC = 6 * 3600
+BJ = dt.timezone(dt.timedelta(hours=8))
+
+
+def _beijing_today():
+    return dt.datetime.now(BJ).date().isoformat()
+
+
+def _cache_dates(obj):
+    dates = []
+    bars = obj.get("bars") if isinstance(obj, dict) else None
+    if isinstance(bars, dict):
+        dates.extend(str(k) for k in bars.keys())
+        for v in bars.values():
+            if isinstance(v, dict) and v.get("date"):
+                dates.append(str(v["date"]))
+    series = obj.get("series") if isinstance(obj, dict) else None
+    if isinstance(series, dict):
+        dates.extend(str(k) for k in series.keys())
+    return dates
+
+
+def cache_get(key, max_age=CACHE_TTL_SEC):
     path = os.path.join(CACHE, key)
     if not os.path.isfile(path):
         return None
     try:
         with open(path, encoding="utf-8") as f:
-            return json.load(f)
+            obj = json.load(f)
     except Exception:
         return None
+    ts = obj.get("_cached_at") if isinstance(obj, dict) else None
+    if not isinstance(ts, (int, float)):
+        return None  # 旧缓存没有时间戳，一律视为过期，避免卡在 11-13
+    if time.time() - float(ts) > max_age:
+        return None
+    dates = _cache_dates(obj)
+    if dates and max(dates) < _beijing_today():
+        return None
+    return obj
 
 
 def cache_put(key, obj):
     os.makedirs(CACHE, exist_ok=True)
     path = os.path.join(CACHE, key)
     tmp = path + ".tmp"
+    payload = dict(obj)
+    payload["_cached_at"] = time.time()
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(obj, f, ensure_ascii=False)
+        json.dump(payload, f, ensure_ascii=False)
     os.replace(tmp, path)
 
 

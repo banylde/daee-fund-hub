@@ -1,5 +1,5 @@
 {
-  "disclaimer": "模拟盘，非投资建议。虚拟资金 500 万，不接券商，不动真钱。私有页面，不公开。",
+  "disclaimer": "模拟盘，非投资建议。虚拟资金 500 万，不接券商，不动真钱。本页只展示模拟盘数据，不含真实持仓、账号或凭据。",
   "start_date": "2026-11-16",
   "currency": "CNY",
   "initial_cash": 5000000,
@@ -176,5 +176,11 @@
     "single_stock_max_of_total": 0.08,
     "industry_lookthrough_max_of_total": 0.3,
     "note": "火部单票上限为总账户 8%；穿透后单一行业不超过 30%（试跑期只监测报告，不强制调仓）"
+  },
+  "lin_company_gate": {
+    "enabled": true,
+    "whitelist": "config/company_whitelist.json",
+    "company_map": "config/lin_fund_companies.json",
+    "note": "用户硬门槛：混合型规模前二十以外或公司未核实的基金不得新建仓，对应额度暂留现金，不放大其余持仓，不强制补满六只。只作用于尚未成交的信号，不改已发生的成交。"
   }
 }

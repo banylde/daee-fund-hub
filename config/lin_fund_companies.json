@@ -1,0 +1,37 @@
+{
+  "source": "https://fundf10.eastmoney.com/jbgk_{code}.html",
+  "retrieved_at": "2026-11-16",
+  "timezone": "Asia/Shanghai",
+  "funds": {
+    "006864": {
+      "company": "国联安基金",
+      "name": "国联安核心资产策略混合",
+      "source": "https://fundf10.eastmoney.com/jbgk_006864.html"
+    },
+    "202019": {
+      "company": "南方基金",
+      "name": "南方策略优化混合",
+      "source": "https://fundf10.eastmoney.com/jbgk_202019.html"
+    },
+    "005094": {
+      "company": "万家基金",
+      "name": "万家臻选混合A",
+      "source": "https://fundf10.eastmoney.com/jbgk_005094.html"
+    },
+    "160613": {
+      "company": "鹏华基金",
+      "name": "鹏华盛世创新混合(LOF)A",
+      "source": "https://fundf10.eastmoney.com/jbgk_160613.html"
+    },
+    "002152": {
+      "company": "华宝基金",
+      "name": "华宝核心优势混合A",
+      "source": "https://fundf10.eastmoney.com/jbgk_002152.html"
+    },
+    "012060": {
+      "company": "富国基金",
+      "name": "富国全球消费精选混合(QDII)人民币A",
+      "source": "https://fundf10.eastmoney.com/jbgk_012060.html"
+    }
+  }
+}

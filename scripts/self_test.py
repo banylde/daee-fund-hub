@@ -476,6 +476,103 @@ def test_no_repeat_signal_if_holdings_unchanged():
     assert len(shan_signals) == 1, shan_signals
 
 
+
+def test_lin_company_gate_blocks_unqualified_and_keeps_cash():
+    """不合格或未核实的基金不得进入建仓信号，原权重不放大，额度留现金。"""
+    import tempfile
+    from pathlib import Path as P
+    import lin_company_filter
+    calendar = ["2026-11-09", "2026-11-10"]
+    prices = {
+        "006864": _bars([
+            ("2026-11-09", 1.5, 1.5),
+            ("2026-11-10", 1.5, 1.5),
+        ], start_prev=1.5),
+        "012060": _bars([
+            ("2026-11-09", 2.0, 2.0),
+            ("2026-11-10", 2.0, 2.0),
+        ], start_prev=2.0),
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    events = {
+        "lin": [{"date": "2026-11-09", "holdings": [
+            {"code": "006864", "name": "不合格基金", "weight": 40, "kind": "fund", "market": "fund"},
+            {"code": "012060", "name": "合格基金", "weight": 24.2, "kind": "fund", "market": "fund"},
+        ], "changes": [], "reason": "建仓"}],
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    wl = {
+        "top20": [
+            {"rank": i, "company": "合格基金管理有限公司" if i == 1 else "其他%02d基金管理有限公司" % i,
+             "aliases": ["合格基金"] if i == 1 else [], "mixed_yi": 1000 - i}
+            for i in range(1, 21)
+        ]
+    }
+    cmap = {"funds": {
+        "006864": {"company": "国联安基金"},
+        "012060": {"company": "合格基金"},
+    }}
+    tmp = P(tempfile.mkdtemp())
+    (tmp / "wl.json").write_text(json.dumps(wl, ensure_ascii=False), encoding="utf-8")
+    (tmp / "map.json").write_text(json.dumps(cmap, ensure_ascii=False), encoding="utf-8")
+    sleeves = {
+        "lin": {"id": "lin", "name": "林部", "target": 0.50, "band": 0.05},
+        "shan": {"id": "shan", "name": "山部", "target": 0.50, "band": 0.05},
+    }
+    rules = _base_rules("2026-11-09", sleeves)
+    rules["lin_company_gate"] = {
+        "enabled": True,
+        "whitelist": str(tmp / "wl.json"),
+        "company_map": str(tmp / "map.json"),
+    }
+    result = simulate(rules, events, prices, calendar)
+    lin_sig = [lg for lg in result["logs"] if lg.get("sleeve") == "lin" and lg.get("type") == "sleeve_trade"]
+    assert len(lin_sig) == 1, lin_sig
+    codes = [h["code"] for h in lin_sig[0]["holdings"]]
+    assert codes == ["012060"], codes
+    assert abs(lin_sig[0]["holdings"][0]["weight"] - 24.2) < 1e-9
+    assert any(x.get("code") == "006864" for x in lin_sig[0].get("excluded") or [])
+    assert "暂留现金" in (lin_sig[0].get("reason") or "")
+    bought = [t["code"] for t in result["trades"] if t.get("side") == "buy"]
+    assert "012060" in bought
+    assert "006864" not in bought
+    # 权重合计不是 100%，不应被放大后买满林部
+    buy = next(t for t in result["trades"] if t["code"] == "012060" and t["side"] == "buy")
+    # 林部资金 50 万，24.2% 约为 12.1 万，绝不应接近 50 万
+    assert buy["notional"] < 200_000, buy["notional"]
+
+
+
+def test_market_cache_expires_stale():
+    """无时间戳或日期落后于北京时间当天的行情缓存不得复用。"""
+    import tempfile, time
+    import market
+    tmp = tempfile.mkdtemp()
+    old_cache = market.CACHE
+    market.CACHE = tmp
+    try:
+        today = market._beijing_today()
+        market.cache_put("k", {"bars": {today: {"date": today, "close": 1}}})
+        hit = market.cache_get("k")
+        assert hit and hit.get("bars")
+        # 无时间戳的旧缓存必须丢弃（曾卡在 11-13）
+        bare = __import__("pathlib").Path(tmp) / "old"
+        bare.write_text(json.dumps({"bars": {"2026-11-13": {"date": "2026-11-13", "close": 1}}}), encoding="utf-8")
+        # cache_get uses CACHE/key as filename directly
+        stale = market.cache_get("old")
+        assert stale is None, stale
+        # 有时间戳但行情日期早于北京时间今天，也丢弃
+        market.cache_put("oldbar", {"bars": {"2026-11-13": {"date": "2026-11-13", "close": 1}}})
+        assert market.cache_get("oldbar") is None
+    finally:
+        market.CACHE = old_cache
+
+
 CASES = [
     ("未建账不产生净值", test_null_start_date),
     ("A股T+1", test_t_plus_one),
@@ -488,6 +585,8 @@ CASES = [
     ("名单解析与日历辅助", test_parse_helpers),
     ("港股汇率记账", test_hk_fx_cash_and_mark),
     ("名单未变不重复发信号", test_no_repeat_signal_if_holdings_unchanged),
+    ("林部公司门槛拦截不合格并不放大仓位", test_lin_company_gate_blocks_unqualified_and_keeps_cash),
+    ("行情缓存过期不再复用旧K线", test_market_cache_expires_stale),
 ]
 
 

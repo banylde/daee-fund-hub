@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from boards import holdings_asof
+import lin_company_filter
 
 EPS = 1e-9
 
@@ -714,23 +715,35 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
         # 4) 正式名单：建账日及之后的名单变化，收盘后发信号
         for sid in sleeve_ids:
             official = holdings_asof(events_by_sleeve.get(sid) or [], day)
+            dropped = []
+            if sid == "lin":
+                official, dropped = lin_company_filter.filter_holdings(official, rules)
             wanted = _target_map(official)
+            gate_note = lin_company_filter.reason_suffix(dropped) if dropped else ""
             # 建账日：用当时已公布的正式名单作为初始持仓目标
             if day == first and wanted and not holding_target[sid]:
                 holding_target[sid] = wanted
                 pending_sleeve[sid] = True
+                reason = "建账，按当日正式名单次日开盘建仓"
+                if gate_note:
+                    reason = reason + "；" + gate_note
                 logs.append({
                     "date": day, "type": "sleeve_trade", "sleeve": sid, "status": "signal",
-                    "reason": "建账，按当日正式名单次日开盘建仓",
+                    "reason": reason,
                     "holdings": [{"code": h["code"], "name": h.get("name"), "weight": h["weight"]} for h in official],
+                    "excluded": dropped,
                 })
             elif day == first and not wanted:
                 holding_target[sid] = {}
                 # 空仓也是正式状态（例如四王留空）
+                reason = "建账时正式名单为空，该部保持现金"
+                if gate_note:
+                    reason = "建账时无可通过公司门槛的林部标的，该部保持现金；" + gate_note
                 logs.append({
                     "date": day, "type": "sleeve_trade", "sleeve": sid, "status": "signal",
-                    "reason": "建账时正式名单为空，该部保持现金",
+                    "reason": reason,
                     "holdings": [],
+                    "excluded": dropped,
                 })
             elif day > first:
                 evs = [e for e in (events_by_sleeve.get(sid) or []) if e["date"] == day]
@@ -738,11 +751,15 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                     holding_target[sid] = wanted
                     pending_sleeve[sid] = True
                     ev = evs[-1]
+                    reason = ev.get("reason") or "；".join(ev.get("changes") or []) or "正式名单更新"
+                    if gate_note:
+                        reason = reason + "；" + gate_note
                     logs.append({
                         "date": day, "type": "sleeve_trade", "sleeve": sid, "status": "signal",
-                        "reason": ev.get("reason") or "；".join(ev.get("changes") or []) or "正式名单更新",
+                        "reason": reason,
                         "changes": ev.get("changes") or [],
                         "holdings": [{"code": h["code"], "name": h.get("name"), "weight": h["weight"]} for h in official],
+                        "excluded": dropped,
                     })
 
         # 5) 季末检查或越界触发

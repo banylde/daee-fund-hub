@@ -43,18 +43,37 @@ def write_json(name, obj):
     return path
 
 
-def official_snapshot(docs):
-    """未建账时也可附带各部最新正式名单，只作展示，不生成净值。"""
+def official_snapshot(docs, rules=None):
+    """未建账时也可附带各部最新正式名单，只作展示，不生成净值。
+    林部展示名单与建仓信号同一公司门槛：不合格或未核实者不作为本机采用的正式持仓。
+    公开仓库的官方名单本身不在此改写。"""
     out = {}
     events = boards.parse_all(docs) if docs else {}
     for sid in boards.SLEEVE_ORDER:
         evs = events.get(sid) or []
         last = evs[-1] if evs else None
-        out[sid] = {
+        holdings = list(last.get("holdings") or []) if last else []
+        rec = {
             "asof": last["date"] if last else None,
-            "holdings": last.get("holdings") if last else [],
+            "holdings": holdings,
             "changes": last.get("changes") if last else [],
         }
+        if sid == "lin" and rules:
+            import lin_company_filter
+            held, dropped = lin_company_filter.filter_holdings(holdings, rules)
+            rec["holdings"] = held
+            rec["public_holdings"] = holdings
+            if dropped:
+                rec["excluded"] = [
+                    {"code": h.get("code"), "name": h.get("name"), "weight": h.get("weight"),
+                     "company": h.get("company"), "reason": h.get("reason")}
+                    for h in dropped
+                ]
+                rec["note"] = (
+                    "公开正式名单仍含下列基金，本机总览已按公司门槛剔除，不作为建仓信号；"
+                    "对应权重暂留现金，不放大其余持仓，不强制补入。公开仓库尚未推送。"
+                )
+        out[sid] = rec
     return out, events
 
 
@@ -75,7 +94,7 @@ def collect_instruments(events_by_sleeve, start):
 def build_summary(rules, result, docs, sources, gaps, board_errors):
     sleeves_cfg = rules["sleeves"]
     started = bool(result.get("started"))
-    official, _ = official_snapshot(docs) if docs else ({}, {})
+    official, _ = official_snapshot(docs, rules) if docs else ({}, {})
     curves = []
     for row in result.get("curves") or []:
         item = {

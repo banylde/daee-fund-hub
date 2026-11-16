@@ -1,10 +1,157 @@
 {
-  "disclaimer": "模拟盘，非投资建议。虚拟资金，不接券商，不动真钱。",
-  "updated_at": "2026-11-15 14:27",
-  "asof": null,
-  "started": false,
-  "has_changes": false,
-  "kinds": [],
-  "logs": [],
+  "disclaimer": "模拟盘，非投资建议。虚拟资金 500 万，不接券商，不动真钱。本页只展示模拟盘数据，不含真实持仓、账号或凭据。",
+  "updated_at": "2026-11-16 18:39",
+  "asof": "2026-11-16",
+  "started": true,
+  "has_changes": true,
+  "kinds": [
+    "子组合调仓"
+  ],
+  "logs": [
+    {
+      "date": "2026-11-16",
+      "type": "sleeve_trade",
+      "sleeve": "shan",
+      "status": "signal",
+      "reason": "建账，按当日正式名单次日开盘建仓",
+      "holdings": [
+        {
+          "code": "603605",
+          "name": "珀莱雅",
+          "weight": 22.5
+        },
+        {
+          "code": "06862",
+          "name": "海底捞",
+          "weight": 22.5
+        },
+        {
+          "code": "03998",
+          "name": "波司登",
+          "weight": 22.5
+        },
+        {
+          "code": "601528",
+          "name": "瑞丰银行",
+          "weight": 10.0
+        },
+        {
+          "code": "300750",
+          "name": "宁德时代",
+          "weight": 22.5
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "date": "2026-11-16",
+      "type": "sleeve_trade",
+      "sleeve": "fire",
+      "status": "signal",
+      "reason": "建账时正式名单为空，该部保持现金",
+      "holdings": [],
+      "excluded": []
+    },
+    {
+      "date": "2026-11-16",
+      "type": "sleeve_trade",
+      "sleeve": "feng",
+      "status": "signal",
+      "reason": "建账，按当日正式名单次日开盘建仓",
+      "holdings": [
+        {
+          "code": "512800",
+          "name": "银行ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159928",
+          "name": "消费ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512690",
+          "name": "酒ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159825",
+          "name": "农业ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512980",
+          "name": "传媒ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512170",
+          "name": "医疗ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159996",
+          "name": "家电ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "516110",
+          "name": "汽车ETF",
+          "weight": 12.5
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "date": "2026-11-16",
+      "type": "sleeve_trade",
+      "sleeve": "lin",
+      "status": "signal",
+      "reason": "建账，按当日正式名单次日开盘建仓；公司门槛未纳入：国联安核心资产策略混合（国联安基金，基金公司不在混合型规模前二十，权重 12.6%）；万家臻选混合A（万家基金，基金公司不在混合型规模前二十，权重 10.6%）；华宝核心优势混合A（华宝基金，基金公司不在混合型规模前二十，权重 9.6%）。对应林部权重合计 32.8% 暂留现金，不放大其余持仓，不强制补入。",
+      "holdings": [
+        {
+          "code": "202019",
+          "name": "南方策略优化混合",
+          "weight": 16.8
+        },
+        {
+          "code": "160613",
+          "name": "鹏华盛世创新混合(LOF)A",
+          "weight": 26.3
+        },
+        {
+          "code": "012060",
+          "name": "富国全球消费精选混合(QDII)人民币A",
+          "weight": 24.2
+        }
+      ],
+      "excluded": [
+        {
+          "code": "006864",
+          "name": "国联安核心资产策略混合",
+          "weight": 12.6,
+          "company": "国联安基金",
+          "reason": "基金公司不在混合型规模前二十",
+          "rank": null
+        },
+        {
+          "code": "005094",
+          "name": "万家臻选混合A",
+          "weight": 10.6,
+          "company": "万家基金",
+          "reason": "基金公司不在混合型规模前二十",
+          "rank": null
+        },
+        {
+          "code": "002152",
+          "name": "华宝核心优势混合A",
+          "weight": 9.6,
+          "company": "华宝基金",
+          "reason": "基金公司不在混合型规模前二十",
+          "rank": null
+        }
+      ]
+    }
+  ],
   "trades": []
 }

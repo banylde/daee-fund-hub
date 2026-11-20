@@ -1,10 +1,68 @@
 {
   "disclaimer": "模拟盘，非投资建议。虚拟资金，不接券商，不动真钱。",
-  "updated_at": "2026-11-20 02:44",
-  "asof": "2026-11-19",
+  "updated_at": "2026-11-21 02:11",
+  "asof": "2026-11-20",
   "started": true,
-  "has_changes": false,
-  "kinds": [],
-  "logs": [],
+  "has_changes": true,
+  "kinds": [
+    "子组合调仓"
+  ],
+  "logs": [
+    {
+      "date": "2026-11-20",
+      "type": "sleeve_trade",
+      "sleeve": "feng",
+      "status": "signal",
+      "reason": "正式名单",
+      "changes": [
+        "红利ETF(92.9) 替换 传媒ETF(32.1)",
+        "证券保险ETF(79.6) 替换 医疗ETF(46.8)",
+        "能源ETF(62.1) 替换 汽车ETF(51.1)"
+      ],
+      "holdings": [
+        {
+          "code": "512800",
+          "name": "银行ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159928",
+          "name": "消费ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "510880",
+          "name": "红利ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512690",
+          "name": "酒ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512070",
+          "name": "证券保险ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159996",
+          "name": "家电ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159930",
+          "name": "能源ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159825",
+          "name": "农业ETF",
+          "weight": 12.5
+        }
+      ],
+      "excluded": []
+    }
+  ],
   "trades": []
 }

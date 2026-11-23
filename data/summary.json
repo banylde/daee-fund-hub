@@ -4,16 +4,16 @@
   "started": true,
   "reason": null,
   "start_date": "2026-11-16",
-  "asof": "2026-11-20",
-  "updated_at": "2026-11-21 02:11",
+  "asof": "2026-11-23",
+  "updated_at": "2026-11-24 05:50",
   "timezone": "Asia/Shanghai",
   "currency": "CNY",
   "initial_cash": 5000000,
-  "nav": 0.9792241439999999,
-  "equity": 4896120.72,
+  "nav": 0.9772568779999999,
+  "equity": 4886284.39,
   "hub_cash": 0.0,
-  "drawdown": -0.020775856000000092,
-  "max_drawdown": -0.020775856000000092,
+  "drawdown": -0.02274312200000006,
+  "max_drawdown": -0.02274312200000006,
   "peak_nav": 1.0,
   "weights": [
     {
@@ -25,11 +25,11 @@
       "band": 0.05,
       "low": 0.25,
       "high": 0.35,
-      "weight": 0.2938010543988384,
-      "equity": 1438485.43,
-      "nav": 0.9589902866666666,
+      "weight": 0.29390797697716486,
+      "equity": 1436117.96,
+      "nav": 0.9574119733333333,
       "cash": 3775.16,
-      "contribution": -0.012302914000000014,
+      "contribution": -0.012776408000000008,
       "official": {
         "asof": "2026-11-20",
         "holdings": [
@@ -81,17 +81,16 @@
       "band": 0.05,
       "low": 0.25,
       "high": 0.35,
-      "weight": 0.30636499501997577,
+      "weight": 0.3069817227727918,
       "equity": 1500000.0,
       "nav": 1.0,
       "cash": 1500000.0,
       "contribution": 0.0,
       "official": {
-        "asof": "2026-11-20",
+        "asof": "2026-11-23",
         "holdings": [],
         "changes": [
           "没有题材同时通过催化、梯队、容量、天数",
-          "情绪退潮，新开仓压到半仓以下（最多1只、7.5%）",
           "四王留空，不凑数"
         ]
       }
@@ -105,11 +104,11 @@
       "band": 0.05,
       "low": 0.15000000000000002,
       "high": 0.25,
-      "weight": 0.19777334248408812,
-      "equity": 968322.16,
-      "nav": 0.96832216,
-      "cash": 245.66,
-      "contribution": -0.006335567999999994,
+      "weight": 0.19695353221141515,
+      "equity": 962370.97,
+      "nav": 0.9623709699999999,
+      "cash": 651.67,
+      "contribution": -0.0075258060000000055,
       "official": {
         "asof": "2026-11-20",
         "holdings": [
@@ -186,11 +185,11 @@
       "band": 0.05,
       "low": 0.15000000000000002,
       "high": 0.25,
-      "weight": 0.20206060809709775,
-      "equity": 989313.13,
-      "nav": 0.98931313,
+      "weight": 0.20215676803862823,
+      "equity": 987795.46,
+      "nav": 0.98779546,
       "cash": 326798.14,
-      "contribution": -0.002137373999999999,
+      "contribution": -0.0024409080000000073,
       "official": {
         "asof": "2026-11-16",
         "holdings": [
@@ -254,10 +253,10 @@
     }
   ],
   "contribution": {
-    "shan": -0.012302914000000014,
+    "shan": -0.012776408000000008,
     "fire": 0.0,
-    "feng": -0.006335567999999994,
-    "lin": -0.002137373999999999
+    "feng": -0.0075258060000000055,
+    "lin": -0.0024409080000000073
   },
   "curves": [
     {
@@ -386,34 +385,65 @@
     },
     {
       "date": "2026-11-20",
-      "nav": 0.9792241439999999,
-      "drawdown": -0.020775856000000092,
-      "equity": 4896120.72,
+      "nav": 0.9785955300000001,
+      "drawdown": -0.021404469999999898,
+      "equity": 4892977.65,
       "hub_cash": 0.0,
       "sleeves": {
         "shan": {
           "nav": 0.9589902866666666,
-          "weight": 0.2938010543988384,
+          "weight": 0.29398978145751387,
           "equity": 1438485.43
         },
         "fire": {
           "nav": 1.0,
-          "weight": 0.30636499501997577,
+          "weight": 0.3065617926948838,
           "equity": 1500000.0
         },
         "feng": {
           "nav": 0.96832216,
-          "weight": 0.19777334248408812,
+          "weight": 0.19790038485052144,
           "equity": 968322.16
         },
         "lin": {
-          "nav": 0.98931313,
-          "weight": 0.20206060809709775,
-          "equity": 989313.13
+          "nav": 0.9861700600000001,
+          "weight": 0.2015480409970808,
+          "equity": 986170.06
         }
       },
       "hs300tr": 0.9936604854515302,
       "equity_fund": 0.9291325833837836
+    },
+    {
+      "date": "2026-11-23",
+      "nav": 0.9772568779999999,
+      "drawdown": -0.02274312200000006,
+      "equity": 4886284.39,
+      "hub_cash": 0.0,
+      "sleeves": {
+        "shan": {
+          "nav": 0.9574119733333333,
+          "weight": 0.29390797697716486,
+          "equity": 1436117.96
+        },
+        "fire": {
+          "nav": 1.0,
+          "weight": 0.3069817227727918,
+          "equity": 1500000.0
+        },
+        "feng": {
+          "nav": 0.9623709699999999,
+          "weight": 0.19695353221141515,
+          "equity": 962370.97
+        },
+        "lin": {
+          "nav": 0.98779546,
+          "weight": 0.20215676803862823,
+          "equity": 987795.46
+        }
+      },
+      "hs300tr": 0.9945952057892355,
+      "equity_fund": 0.9398045813563856
     }
   ],
   "benchmarks": {
@@ -874,6 +904,193 @@
       "note": "按正式名单调仓",
       "kind": "fund",
       "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "159825",
+      "name": "农业ETF",
+      "side": "sell",
+      "shares": 1200,
+      "open": 0.706,
+      "price": 0.705,
+      "notional": 846.0,
+      "commission": 0.25,
+      "stamp": 0.0,
+      "slippage": 1.2,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "159928",
+      "name": "消费ETF",
+      "side": "sell",
+      "shares": 4500,
+      "open": 0.7,
+      "price": 0.699,
+      "notional": 3145.5,
+      "commission": 0.94,
+      "stamp": 0.0,
+      "slippage": 4.5,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "159996",
+      "name": "家电ETF",
+      "side": "sell",
+      "shares": 1900,
+      "open": 1.335,
+      "price": 1.334,
+      "notional": 2534.6,
+      "commission": 0.76,
+      "stamp": 0.0,
+      "slippage": 1.9,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "512170",
+      "name": "医疗ETF",
+      "side": "sell",
+      "shares": 370900.0,
+      "open": 0.32,
+      "price": 0.32,
+      "notional": 118688.0,
+      "commission": 35.61,
+      "stamp": 0.0,
+      "slippage": 0.0,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "512690",
+      "name": "酒ETF",
+      "side": "sell",
+      "shares": 1900,
+      "open": 0.43,
+      "price": 0.43,
+      "notional": 817.0,
+      "commission": 0.25,
+      "stamp": 0.0,
+      "slippage": 0.0,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "512800",
+      "name": "银行ETF",
+      "side": "sell",
+      "shares": 6500,
+      "open": 0.923,
+      "price": 0.922,
+      "notional": 5993.0,
+      "commission": 1.8,
+      "stamp": 0.0,
+      "slippage": 6.5,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "512980",
+      "name": "传媒ETF",
+      "side": "sell",
+      "shares": 158000.0,
+      "open": 0.697,
+      "price": 0.696,
+      "notional": 109968.0,
+      "commission": 32.99,
+      "stamp": 0.0,
+      "slippage": 158.0,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "516110",
+      "name": "汽车ETF",
+      "side": "sell",
+      "shares": 117800.0,
+      "open": 1.011,
+      "price": 1.01,
+      "notional": 118978.0,
+      "commission": 35.69,
+      "stamp": 0.0,
+      "slippage": 117.8,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "159930",
+      "name": "能源ETF",
+      "side": "buy",
+      "shares": 70800,
+      "open": 1.695,
+      "price": 1.697,
+      "notional": 120147.6,
+      "commission": 36.04,
+      "stamp": 0.0,
+      "slippage": 141.6,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "510880",
+      "name": "红利ETF",
+      "side": "buy",
+      "shares": 35100,
+      "open": 3.42,
+      "price": 3.423,
+      "notional": 120147.3,
+      "commission": 36.04,
+      "stamp": 0.0,
+      "slippage": 105.3,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
+    },
+    {
+      "date": "2026-11-23",
+      "sleeve": "feng",
+      "code": "512070",
+      "name": "证券保险ETF",
+      "side": "buy",
+      "shares": 158800,
+      "open": 0.755,
+      "price": 0.756,
+      "notional": 120052.8,
+      "commission": 36.02,
+      "stamp": 0.0,
+      "slippage": 158.8,
+      "note": "按正式名单调仓",
+      "kind": "etf",
+      "fx": 1.0
     }
   ],
   "links": [
@@ -924,7 +1141,7 @@
   ],
   "gaps": [
     {
-      "date": "2026-11-20",
+      "date": "2026-11-23",
       "reason": "部分持仓缺当日价格，已沿用最近收盘"
     },
     {
@@ -938,7 +1155,7 @@
   "pending_sleeve": {
     "shan": false,
     "fire": false,
-    "feng": true,
+    "feng": false,
     "lin": false
   }
 }

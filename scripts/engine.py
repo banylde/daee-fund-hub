@@ -302,6 +302,8 @@ def rebalance_sleeve(book, day, target, prices, fx_series, costs, fill_cfg, cale
             "name": spec.get("name") or code,
             "kind": spec.get("kind") or "ashare_stock",
             "market": spec.get("market"),
+            "industry": spec.get("industry"),
+            "industry_source": spec.get("industry_source"),
         }
         quote = _quote(prices, code, day)
         open_px = _mark_price(quote, "open")
@@ -495,6 +497,7 @@ def _transfer_units(book, cash_delta):
 def transfer_capital(books, hub_cash, day, targets, prices, fx_series, costs, fill_cfg, calendar, blocked, trades):
     """按 active 大类权重调各部资本。超配的先按权重比例减仓，现金进总账，再补给低配部。"""
     equities = {}
+    reasons = {}
     total = hub_cash
     for sid, book in books.items():
         eq, _ = sleeve_equity(book, prices, fx_series, day, field="open")
@@ -523,10 +526,11 @@ def transfer_capital(books, hub_cash, day, targets, prices, fx_series, costs, fi
             factor = _ccy_factor(meta, fx_series, day)
             w = 0.0 if eq_close_proxy <= 0 else (shares * px * factor) / eq_close_proxy * 100.0
             scaled[code] = {**meta, "weight": w * ratio, "code": code}
-        rebalance_sleeve(
+        got = rebalance_sleeve(
             book, day, scaled, prices, fx_series, costs, fill_cfg, calendar,
             blocked.setdefault(sid, {}), trades, "大类再平衡减仓",
         )
+        reasons[sid] = got or {}
         new_eq, _ = sleeve_equity(book, prices, fx_series, day, field="open")
         give = round_cash(new_eq - want)
         # 减仓后现金应有富余；若仍超，把现金上缴到目标。
@@ -550,7 +554,7 @@ def transfer_capital(books, hub_cash, day, targets, prices, fx_series, costs, fi
         if give > 0:
             _transfer_units(book, give)
             hub_cash = round_cash(hub_cash - give)
-    return hub_cash, {}
+    return hub_cash, reasons
 
 
 def _rebase_index(series, start):
@@ -617,6 +621,9 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
     pending_sleeve = {sid: False for sid in sleeve_ids}
     capital_targets = dict(strategic)
     cash_target = 0.0
+    last_block_reason = {sid: {} for sid in sleeve_ids}
+    last_signal = {}
+    last_macro = None
 
     def total_equity(day, field="close"):
         s = hub_cash
@@ -667,10 +674,13 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
         # 1) 开盘：先做大类资金再平衡，再按各部目标持仓成交
         if i > 0 and (pending_macro or any(pending_sleeve.values()) or any(blocked[s] for s in sleeve_ids)):
             if pending_macro:
-                hub_cash, _ = transfer_capital(
+                hub_cash, macro_reasons = transfer_capital(
                     books, hub_cash, day, capital_targets, prices, fx_series,
                     costs, fill_cfg, calendar, blocked, trades,
                 )
+                for sid, got in (macro_reasons or {}).items():
+                    if got:
+                        last_block_reason[sid] = got
                 logs.append({
                     "date": day, "type": "rebalance", "status": "filled",
                     "reason": "按大类目标权重再平衡（次日开盘成交）",
@@ -679,10 +689,11 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                 pending_macro = False
             for sid, book in books.items():
                 if pending_sleeve[sid] or blocked[sid]:
-                    rebalance_sleeve(
+                    got = rebalance_sleeve(
                         book, day, holding_target[sid], prices, fx_series, costs, fill_cfg,
                         calendar, blocked[sid], trades, "按正式名单调仓",
                     )
+                    last_block_reason[sid] = got or {}
                     if blocked[sid]:
                         logs.append({
                             "date": day, "type": "sleeve_trade", "sleeve": sid,
@@ -711,6 +722,12 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
             logs.append(ev)
             if ev.get("action") in ("reduce", "restore"):
                 pending_macro = True
+                last_macro = {
+                    "date": day,
+                    "reason": ev.get("reason") or "回撤降仓",
+                    "targets": dict(capital_targets),
+                    "offenders": [],
+                }
 
         # 4) 正式名单：建账日及之后的名单变化，收盘后发信号
         for sid in sleeve_ids:
@@ -733,6 +750,7 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                     "holdings": [{"code": h["code"], "name": h.get("name"), "weight": h["weight"]} for h in official],
                     "excluded": dropped,
                 })
+                last_signal[sid] = {"date": day, "reason": reason, "holdings": list(official)}
             elif day == first and not wanted:
                 holding_target[sid] = {}
                 # 空仓也是正式状态（例如四王留空）
@@ -745,6 +763,7 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                     "holdings": [],
                     "excluded": dropped,
                 })
+                last_signal[sid] = {"date": day, "reason": reason, "holdings": []}
             elif day > first:
                 evs = [e for e in (events_by_sleeve.get(sid) or []) if e["date"] == day]
                 if evs and _holdings_key(wanted) != _holdings_key(holding_target[sid]):
@@ -761,6 +780,7 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                         "holdings": [{"code": h["code"], "name": h.get("name"), "weight": h["weight"]} for h in official],
                         "excluded": dropped,
                     })
+                    last_signal[sid] = {"date": day, "reason": reason, "holdings": list(official)}
 
         # 5) 季末检查或越界触发
         offenders = _outside_band(weights, rules)
@@ -783,6 +803,9 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
                 "reason": reason, "offenders": offenders, "quarter_end": quarter,
                 "weights": weights, "targets": dict(capital_targets),
             })
+            last_macro = {
+                "date": day, "reason": reason, "targets": dict(capital_targets), "offenders": offenders,
+            }
 
     last = nav_rows[-1] if nav_rows else None
     # 指数定基
@@ -803,6 +826,17 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
         for sid in sleeve_ids:
             start_eq = initial * strategic[sid]
             contrib[sid] = 0.0 if initial <= 0 else (last["sleeves"][sid]["equity"] - start_eq) / initial
+
+    import report
+    ledger, risk = report.compose(
+        rules, True, asof, books, trades, holding_target, blocked, last_block_reason,
+        pending_sleeve, pending_macro, last_signal, last_macro, capital_targets, strategic,
+        prices, fx_series, calendar, last, dd_state,
+    )
+    for gap in report.extra_gaps(ledger, risk):
+        reason = gap.get("reason")
+        if reason and not any((g.get("reason") if isinstance(g, dict) else g) == reason for g in gaps):
+            gaps.append(gap)
 
     return {
         "status": "ok",
@@ -830,11 +864,19 @@ def simulate(rules, events_by_sleeve, prices, calendar, fx_series=None, indexes=
         "pending_sleeve": pending_sleeve,
         "blocked": blocked,
         "strategic": strategic,
+        "ledger": ledger,
+        "risk": risk,
     }
 
 
 def not_started(rules, reason="start_date 为空，未建账"):
     strategic = _strategic_weights(rules) if rules.get("sleeves") else {}
+    import report
+    ledger, risk = report.compose(
+        rules, False, None, {}, [], {}, {}, {},
+        {}, False, {}, None, strategic, strategic,
+        {}, None, [], None, {},
+    )
     return {
         "status": "not_started",
         "started": False,
@@ -856,9 +898,11 @@ def not_started(rules, reason="start_date 为空，未建账"):
         "cash_target": 0.0,
         "trades": [],
         "logs": [],
-        "gaps": [],
+        "gaps": report.extra_gaps(ledger, risk),
         "pending_macro": False,
         "pending_sleeve": {},
         "blocked": {},
         "strategic": strategic,
+        "ledger": ledger,
+        "risk": risk,
     }

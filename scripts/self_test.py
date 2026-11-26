@@ -16,6 +16,7 @@ from engine import (
     is_quarter_end, lot_of, next_trading_day, not_started, round_cash,
     simulate, trading_sessions,
 )
+from report import classify_band, drawdown_board, limit_status
 
 
 def _bars(seq, start_prev=None):
@@ -573,6 +574,535 @@ def test_market_cache_expires_stale():
         market.CACHE = old_cache
 
 
+def _fee_cents(value):
+    return int(round(float(value or 0) * 100))
+
+
+def _assert_fees_match(result):
+    fees = result["ledger"]["fees"]
+    filled = result["ledger"]["filled"]
+    assert _fee_cents(fees["commission"]) == sum(_fee_cents(t["commission"]) for t in filled)
+    assert _fee_cents(fees["stamp"]) == sum(_fee_cents(t["stamp"]) for t in filled)
+    assert _fee_cents(fees["slippage"]) == sum(_fee_cents(t["slippage"]) for t in filled)
+    assert _fee_cents(fees["total"]) == (
+        _fee_cents(fees["commission"]) + _fee_cents(fees["stamp"]) + _fee_cents(fees["slippage"])
+    )
+    assert filled and all(t["status"] == "filled" for t in filled)
+    for t in filled:
+        part = _fee_cents(t["commission"]) + _fee_cents(t["stamp"]) + _fee_cents(t["slippage"])
+        assert _fee_cents(t["fee_total"]) == part
+
+
+def _trade_sig(result):
+    return [
+        (t["date"], t["code"], t["side"], t["shares"], t["notional"], t["commission"], t["stamp"])
+        for t in result["trades"]
+    ]
+
+
+def test_band_and_limit_status_math():
+    inside = classify_band(0.30, 0.30, 0.05)
+    assert inside["status"] == "区间内" and inside["inside"] is True and inside["action"] == "仅展示"
+    above = classify_band(0.36, 0.30, 0.05)
+    assert above["status"] == "高于上限" and above["inside"] is False
+    below = classify_band(0.24, 0.30, 0.05)
+    assert below["status"] == "低于下限"
+    edge = classify_band(0.349, 0.30, 0.05)
+    assert edge["status"] == "接近边界" and edge["inside"] is True
+    missing = classify_band(None, 0.30, 0.05)
+    assert missing["status"] == "无权重" and missing["weight"] is None
+    assert limit_status(None, 0.08, missing=True) == "缺价"
+    assert limit_status(0.05, 0.08) == "未接近"
+    assert limit_status(0.064, 0.08) == "接近"
+    assert limit_status(0.08, 0.08) == "超过"
+    levels = [
+        {"drawdown": 0.10, "action": "warn", "note": "预警"},
+        {"drawdown": 0.15, "action": "reduce", "targets": {"fire": 0.15, "feng": 0.15}, "note": "一档"},
+        {"drawdown": 0.20, "action": "reduce", "targets": {"fire": 0.0, "feng": 0.10}, "note": "二档"},
+    ]
+    board = drawdown_board(-0.12, levels, enabled=True)
+    assert abs(board["magnitude"] - 0.12) < 1e-12
+    by = {row["drawdown"]: row for row in board["levels"]}
+    assert by[0.10]["reached"] is True and abs(by[0.10]["distance"] - (0.10 - 0.12)) < 1e-12
+    assert by[0.15]["reached"] is False and abs(by[0.15]["distance"] - 0.03) < 1e-12
+    assert by[0.20]["reached"] is False
+    assert board["active"]["action"] == "warn"
+    assert board["levels"][2]["targets"]["fire"] == 0.0
+    assert board["display_only"] is True
+    quiet = drawdown_board(None, levels, enabled=True)
+    assert quiet["magnitude"] is None and all(row["distance"] is None and row["reached"] is False for row in quiet["levels"])
+
+
+def test_ledger_pending_differs_from_filled():
+    """涨停顺延停在待成交；已成交的买入不进待成交。卖出信号未到开盘，也不写成已成交。"""
+    calendar = ["2026-11-09", "2026-11-10"]
+    prices = {
+        "600000": _bars([
+            ("2026-11-09", 10.00, 10.00),
+            ("2026-11-10", 11.00, 11.00),
+        ], start_prev=10.00),
+        "000001": _bars([
+            ("2026-11-09", 10.00, 10.00),
+            ("2026-11-10", 10.00, 11.00),
+        ], start_prev=10.00),
+    }
+    events = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": ["建仓"], "reason": "建仓"}],
+        "fire": [
+            {"date": "2026-11-09", "holdings": [
+                {"code": "000001", "name": "测试股B", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+            ], "changes": ["建仓"], "reason": "建仓"},
+            {"date": "2026-11-10", "holdings": [], "changes": ["清仓"], "reason": "清仓"},
+        ],
+    }
+    rules = _base_rules("2026-11-09", _two_sleeves())
+    result = simulate(rules, events, prices, calendar)
+    ledger = result["ledger"]
+    assert not any(t["code"] == "600000" for t in ledger["filled"])
+    deferred = [p for p in ledger["pending"] if p.get("code") == "600000"]
+    assert len(deferred) == 1 and deferred[0]["status"] == "deferred"
+    assert "涨停" in deferred[0]["reason"] and deferred[0]["side"] == "buy"
+    assert deferred[0]["current_shares"] == 0
+    assert ("000001", "buy") in {(t["code"], t["side"]) for t in ledger["filled"]}
+    assert ("000001", "sell") not in {(t["code"], t["side"]) for t in ledger["filled"]}
+    sell_wait = [p for p in ledger["pending"] if p.get("code") == "000001"]
+    assert len(sell_wait) == 1 and sell_wait[0]["status"] == "signal" and sell_wait[0]["side"] == "sell"
+    assert "不估算" in sell_wait[0]["reason"]
+    assert all(t.get("code") != "600000" for t in result["trades"])
+    held = {p["code"] for p in ledger["positions"]}
+    assert held == {"000001"}
+    _assert_fees_match(result)
+
+    done_cal = calendar + ["2026-11-11", "2026-11-12"]
+    prices["600000"] = _bars([
+        ("2026-11-09", 10.00, 10.00),
+        ("2026-11-10", 11.00, 11.00),
+        ("2026-11-11", 10.50, 10.50),
+        ("2026-11-12", 10.50, 10.50),
+    ], start_prev=10.00)
+    prices["000001"] = _bars([
+        ("2026-11-09", 10.00, 10.00),
+        ("2026-11-10", 10.00, 11.00),
+        ("2026-11-11", 9.90, 9.90),
+        ("2026-11-12", 10.00, 10.00),
+    ], start_prev=10.00)
+    done = simulate(rules, events, prices, done_cal)
+    assert any(t["code"] == "600000" and t["side"] == "buy" and t["status"] == "filled" for t in done["ledger"]["filled"])
+    assert any(t["code"] == "000001" and t["side"] == "sell" and t["status"] == "filled" for t in done["ledger"]["filled"])
+    assert not any(p.get("code") in ("600000", "000001") for p in done["ledger"]["pending"])
+    _assert_fees_match(done)
+
+
+def test_ledger_fees_match_lines_and_hk_stamp_gap():
+    calendar = ["2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12"]
+    prices = {
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+            ("2026-11-11", 10.0, 10.0),
+            ("2026-11-12", 10.0, 10.0),
+        ], start_prev=10.0),
+        "510300": _bars([
+            ("2026-11-09", 4.0, 4.0),
+            ("2026-11-10", 4.0, 4.0),
+            ("2026-11-11", 4.0, 4.0),
+            ("2026-11-12", 4.0, 4.0),
+        ], start_prev=4.0),
+    }
+    events = {
+        "shan": [
+            {"date": "2026-11-09", "holdings": [
+                {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+            ], "changes": [], "reason": "建仓"},
+            {"date": "2026-11-10", "holdings": [], "changes": ["清仓"], "reason": "清仓"},
+        ],
+        "fire": [
+            {"date": "2026-11-09", "holdings": [
+                {"code": "510300", "name": "测试ETF", "weight": 100, "kind": "etf", "market": "sh"}
+            ], "changes": [], "reason": "建仓"},
+            {"date": "2026-11-10", "holdings": [], "changes": ["清仓"], "reason": "清仓"},
+        ],
+    }
+    result = simulate(_base_rules("2026-11-09", _two_sleeves()), events, prices, calendar)
+    _assert_fees_match(result)
+    stock_sell = next(t for t in result["ledger"]["filled"] if t["code"] == "600000" and t["side"] == "sell")
+    etf_sell = next(t for t in result["ledger"]["filled"] if t["code"] == "510300" and t["side"] == "sell")
+    assert stock_sell["stamp"] > 0 and etf_sell["stamp"] == 0
+    assert _fee_cents(result["ledger"]["fees"]["stamp"]) == _fee_cents(stock_sell["stamp"])
+    assert result["ledger"]["positions"] == []
+
+    hk_prices = {
+        "03998": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    hk_events = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "03998", "name": "测试港股", "weight": 100, "kind": "hk_stock", "market": "hk"}
+        ], "changes": [], "reason": "建仓"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    hk = simulate(
+        _base_rules("2026-11-09", _two_sleeves()), hk_events, hk_prices,
+        ["2026-11-09", "2026-11-10"], fx_series={"2026-11-09": 0.85, "2026-11-10": 0.85},
+    )
+    hk_buy = next(t for t in hk["ledger"]["filled"] if t["code"] == "03998")
+    assert hk_buy["stamp"] == 0
+    _assert_fees_match(hk)
+    assert any("港股印花税未单列" in g["reason"] for g in hk["ledger"]["gaps"])
+    assert not any(t["stamp"] > 0 and t["kind"] == "hk_stock" for t in hk["ledger"]["filled"])
+
+
+def test_t_plus_marks():
+    calendar = ["2026-11-09", "2026-11-10"]
+    prices = {
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+        "03998": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    events = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "03998", "name": "测试港股", "weight": 100, "kind": "hk_stock", "market": "hk"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    rules = _base_rules("2026-11-09", _two_sleeves())
+    fx = {d: 0.85 for d in calendar}
+    locked = simulate(rules, events, prices, calendar, fx_series=fx)
+    a = next(row for row in locked["ledger"]["locks"] if row["code"] == "600000")
+    hk = next(row for row in locked["ledger"]["locks"] if row["code"] == "03998")
+    assert a["status"] == "T+1锁定"
+    assert a["locked_shares"] == a["shares"] and a["sellable_shares"] == 0
+    assert a["lots"][0]["sellable_on"] is None
+    assert hk["status"] == "T+0 当日可卖" and hk["locked_shares"] == 0 and hk["sellable_shares"] == hk["shares"]
+
+    later_cal = calendar + ["2026-11-11"]
+    prices["600000"]["2026-11-11"] = {
+        "date": "2026-11-11", "open": 10.0, "close": 10.0, "high": 10.0, "low": 10.0, "prev": 10.0,
+    }
+    prices["03998"]["2026-11-11"] = {
+        "date": "2026-11-11", "open": 10.0, "close": 10.0, "high": 10.0, "low": 10.0, "prev": 10.0,
+    }
+    opened = simulate(rules, events, prices, later_cal, fx_series={d: 0.85 for d in later_cal})
+    a2 = next(row for row in opened["ledger"]["locks"] if row["code"] == "600000")
+    assert a2["status"] == "可卖" and a2["locked_shares"] == 0 and a2["sellable_shares"] == a2["shares"]
+    assert a2["lots"][0]["sellable_on"] == "2026-11-11"
+
+    fund_prices = {
+        "006864": _bars([
+            ("2026-11-09", 1.5, 1.5),
+            ("2026-11-10", 1.51, 1.51),
+        ], start_prev=1.5),
+        "600000": prices["600000"],
+    }
+    fund_events = {
+        "lin": [{"date": "2026-11-09", "holdings": [
+            {"code": "006864", "name": "测试基金", "weight": 100, "kind": "fund", "market": "fund"}
+        ], "changes": [], "reason": "建仓"}],
+        "shan": events["shan"],
+    }
+    sleeves = {
+        "lin": {"id": "lin", "name": "林部", "target": 0.50, "band": 0.05},
+        "shan": {"id": "shan", "name": "山部", "target": 0.50, "band": 0.05},
+    }
+    fund = simulate(_base_rules("2026-11-09", sleeves), fund_events, fund_prices, calendar)
+    fund_lock = next(row for row in fund["ledger"]["locks"] if row["code"] == "006864")
+    assert fund_lock["status"] == "T+1锁定" and fund_lock["sellable_shares"] == 0
+
+
+def test_r1_distance_on_book():
+    calendar = ["2026-11-09", "2026-11-10", "2026-11-11"]
+    flat = [
+        ("2026-11-09", 10.0, 10.0),
+        ("2026-11-10", 10.0, 10.0),
+        ("2026-11-11", 10.0, 10.0),
+    ]
+    prices = {code: _bars(flat, start_prev=10.0) for code in ("600000", "000001", "510300", "000002")}
+    events = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "x"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "000001", "name": "B", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+        ], "changes": [], "reason": "x"}],
+        "feng": [{"date": "2026-11-09", "holdings": [
+            {"code": "510300", "name": "C", "weight": 100, "kind": "etf", "market": "sh"}
+        ], "changes": [], "reason": "x"}],
+        "lin": [{"date": "2026-11-09", "holdings": [
+            {"code": "000002", "name": "D", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+        ], "changes": [], "reason": "x"}],
+    }
+    rules = _base_rules("2026-11-09", _four_sleeves(), enabled_dd=True)
+    quiet = simulate(rules, events, prices, calendar)
+    board = quiet["risk"]["drawdown"]
+    mag = board["magnitude"]
+    assert mag is not None and mag < 0.10
+    for row in board["levels"]:
+        assert row["reached"] is False
+        assert abs(row["distance"] - (row["drawdown"] - mag)) < 1e-9
+    assert board["active"] is None and board["enabled"] is True and board["display_only"] is True
+
+    dropped = [
+        ("2026-11-09", 10.0, 10.0),
+        ("2026-11-10", 10.0, 8.0),
+        ("2026-11-11", 8.0, 8.0),
+        ("2026-11-12", 8.0, 8.0),
+    ]
+    deep_prices = {code: _bars(dropped, start_prev=10.0) for code in prices}
+    deep = simulate(rules, events, deep_prices, calendar + ["2026-11-12"])
+    deep_board = deep["risk"]["drawdown"]
+    deep_mag = deep_board["magnitude"]
+    assert deep_mag >= 0.15
+    for row in deep_board["levels"]:
+        assert abs(row["distance"] - (row["drawdown"] - deep_mag)) < 1e-9
+        assert row["reached"] == (deep_mag + 1e-12 >= row["drawdown"])
+    assert deep_board["applied_targets"] == {k: float(v) for k, v in deep["capital_targets"].items()}
+    assert deep["risk"]["display_only"] is True
+    # 测试夹具的 20% 档把火部写成 0，仪表必须照抄规则，不能换成另一套档位
+    level20 = next(row for row in deep_board["levels"] if abs(row["drawdown"] - 0.20) < 1e-12)
+    assert level20["targets"]["fire"] == 0.0
+
+
+def test_single_name_and_industry_report_only():
+    calendar = ["2026-11-09", "2026-11-10", "2026-11-11"]
+    seq = [
+        ("2026-11-09", 10.0, 10.0),
+        ("2026-11-10", 10.0, 10.0),
+        ("2026-11-11", 10.0, 10.0),
+    ]
+    prices = {
+        "600000": _bars(seq, start_prev=10.0),
+        "000001": _bars(seq, start_prev=10.0),
+    }
+    bare = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "山", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "000001", "name": "火", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    tagged = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "山", "weight": 100, "kind": "ashare_stock", "market": "sh", "industry": "银行"}
+        ], "changes": [], "reason": "建仓"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "000001", "name": "火", "weight": 100, "kind": "ashare_stock", "market": "sz", "industry": "银行"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    rules = _base_rules("2026-11-09", _two_sleeves())
+    rules["position_limits"] = {
+        "single_stock_max_of_total": 0.08,
+        "industry_lookthrough_max_of_total": 0.30,
+    }
+    plain = simulate(rules, bare, prices, calendar)
+    marked = simulate(rules, tagged, prices, calendar)
+    assert _trade_sig(plain) == _trade_sig(marked)
+    assert marked["capital_targets"]["fire"] == plain["capital_targets"]["fire"] == 0.5
+    row = next(r for r in marked["risk"]["single_stock"]["rows"] if r["code"] == "000001")
+    assert row["status"] == "超过" and row["weight_of_total"] > 0.08
+    assert row["action"] == "仅展示，不调仓"
+    ind = next(r for r in marked["risk"]["industry"]["rows"] if r["industry"] == "银行")
+    assert ind["status"] == "超过" and ind["weight_of_total"] > 0.30
+    assert {p["code"] for p in ind["positions"]} == {"600000", "000001"}
+    assert ind["action"] == "仅报告，不强制调仓"
+    assert all("单票" not in (t.get("note") or "") and "行业" not in (t.get("note") or "") for t in marked["trades"])
+    assert marked["risk"]["display_only"] is True
+
+    # 没标签的大仓不能算进行业，也不能并进已有行业
+    near_sleeves = {
+        "shan": {"id": "shan", "name": "山部", "target": 0.93, "band": 0.05},
+        "fire": {"id": "fire", "name": "火部", "target": 0.07, "band": 0.05},
+    }
+    near_events = {
+        "shan": bare["shan"],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "000001", "name": "火", "weight": 100, "kind": "ashare_stock", "market": "sz", "industry": "银行"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    near = simulate(_base_rules("2026-11-09", near_sleeves), near_events, prices, calendar)
+    fire_row = next(r for r in near["risk"]["single_stock"]["rows"] if r["code"] == "000001")
+    assert fire_row["status"] == "接近" and fire_row["weight_of_total"] < 0.08
+    assert all(r["status"] != "超过" for r in near["risk"]["industry"]["rows"])
+    assert any(u["code"] == "600000" and u["reason"] == "行业分类缺失" for u in near["risk"]["industry"]["unclassified"])
+    bank = next(r for r in near["risk"]["industry"]["rows"] if r["industry"] == "银行")
+    assert {p["code"] for p in bank["positions"]} == {"000001"}
+    assert any("缺少行业分类" in g["reason"] for g in near["risk"]["gaps"])
+
+
+def test_band_breach_is_display_only():
+    calendar = ["2026-11-09", "2026-11-10", "2026-11-11"]
+    prices = {
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 13.0),
+            ("2026-11-11", 13.0, 13.0),
+        ], start_prev=10.0),
+        "000001": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+            ("2026-11-11", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    events = {
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+        "fire": [{"date": "2026-11-09", "holdings": [
+            {"code": "000001", "name": "测试股B", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    rules = _base_rules("2026-11-09", _two_sleeves())
+    rules["rebalance"] = {"quarter_end_check": False, "band_trigger": False, "pull_to": "target"}
+    result = simulate(rules, events, prices, calendar)
+    shan = next(b for b in result["risk"]["bands"] if b["id"] == "shan")
+    fire = next(b for b in result["risk"]["bands"] if b["id"] == "fire")
+    assert shan["status"] == "高于上限" and shan["inside"] is False and shan["action"] == "仅展示"
+    assert fire["status"] == "低于下限" and fire["action"] == "仅展示"
+    assert not any(lg.get("type") == "rebalance" for lg in result["logs"])
+    assert result["capital_targets"]["shan"] == 0.5
+    assert not any(p.get("status") == "macro" for p in result["ledger"]["pending"])
+
+    live = _base_rules("2026-11-09", _two_sleeves())
+    stopped = simulate(live, events, prices, ["2026-11-09", "2026-11-10"])
+    assert any(p.get("status") == "macro" for p in stopped["ledger"]["pending"])
+    assert not any(lg.get("type") == "rebalance" and lg.get("status") == "filled" for lg in stopped["logs"])
+    shan_now = next(b for b in stopped["risk"]["bands"] if b["id"] == "shan")
+    assert shan_now["status"] == "高于上限"
+    assert all(t["side"] == "buy" for t in stopped["trades"])
+
+
+def test_ledger_does_not_invent_positions():
+    empty = not_started(_base_rules(None, _four_sleeves()))
+    assert empty["nav"] is None and empty["ledger"]["positions"] == []
+    assert empty["ledger"]["filled"] == [] and empty["ledger"]["pending"] == []
+    assert empty["risk"]["drawdown"]["magnitude"] is None
+    assert empty["risk"]["single_stock"]["rows"] == []
+    assert all(b["status"] == "无权重" for b in empty["risk"]["bands"])
+
+    calendar = ["2026-11-09"]
+    prices = {"600000": _bars([("2026-11-09", 10.0, 10.0)], start_prev=10.0)}
+    events = {"shan": [{"date": "2026-11-09", "holdings": [
+        {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+    ], "changes": ["建仓"], "reason": "建仓"}]}
+    sleeves = {"shan": {"id": "shan", "name": "山部", "target": 1.0, "band": 0.05}}
+    signal_only = simulate(_base_rules("2026-11-09", sleeves), events, prices, calendar)
+    assert signal_only["trades"] == []
+    assert signal_only["ledger"]["positions"] == []
+    assert signal_only["ledger"]["filled"] == []
+    assert any(p["code"] == "600000" and p["status"] == "signal" for p in signal_only["ledger"]["pending"])
+
+    # 更新的空名单覆盖更早的持仓，旧代码不能留在当前仓位里
+    prices2 = {
+        "600000": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+        "000001": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    old_events = {
+        "fire": [
+            {"date": "2026-11-01", "holdings": [
+                {"code": "000001", "name": "旧仓", "weight": 100, "kind": "ashare_stock", "market": "sz"}
+            ], "changes": [], "reason": "旧"},
+            {"date": "2026-11-09", "holdings": [], "changes": ["空仓"], "reason": "空仓"},
+        ],
+        "shan": [{"date": "2026-11-09", "holdings": [
+            {"code": "600000", "name": "测试股A", "weight": 100, "kind": "ashare_stock", "market": "sh"}
+        ], "changes": [], "reason": "建仓"}],
+    }
+    cleared = simulate(_base_rules("2026-11-09", _two_sleeves()), old_events, prices2, ["2026-11-09", "2026-11-10"])
+    assert all(p["code"] != "000001" for p in cleared["ledger"]["positions"])
+    assert all(t["code"] != "000001" for t in cleared["trades"])
+    assert all(p.get("code") != "000001" for p in cleared["ledger"]["pending"])
+    assert any(s["id"] == "fire" for s in cleared["ledger"]["empty_sleeves"])
+
+    # 有仓但缺截止日价：不把旧收盘填成占比，也不写成 0% 未超限
+    gap_prices = {
+        "000001": _bars([
+            ("2026-11-09", 10.0, 10.0),
+            ("2026-11-10", 10.0, 10.0),
+        ], start_prev=10.0),
+    }
+    gap_events = {"fire": [{"date": "2026-11-09", "holdings": [
+        {"code": "000001", "name": "火", "weight": 100, "kind": "ashare_stock", "market": "sz", "industry": "银行"}
+    ], "changes": [], "reason": "建仓"}]}
+    gap_rules = _base_rules("2026-11-09", {"fire": {"id": "fire", "name": "火部", "target": 1.0, "band": 0.05}})
+    gap = simulate(gap_rules, gap_events, gap_prices, ["2026-11-09", "2026-11-10", "2026-11-11"])
+    pos = next(p for p in gap["ledger"]["positions"] if p["code"] == "000001")
+    assert pos["shares"] > 0 and pos["price_gap"] is True and pos["market_value"] is None and pos["close"] is None
+    row = gap["risk"]["single_stock"]["rows"][0]
+    assert row["status"] == "缺价" and row["weight_of_total"] is None
+    assert gap["risk"]["industry"]["rows"] == []
+    assert any(x["code"] == "000001" for x in gap["risk"]["industry"]["incomplete"])
+    assert any("不沿用旧价" in g["reason"] for g in gap["risk"]["gaps"])
+
+
+def test_industry_label_passthrough_does_not_guess():
+    from boards import parse_feng, parse_fire, parse_lin, parse_shan
+    shan = parse_shan(
+        {"rebalance_date": "2026-11-20", "items": [
+            {"code": "601528", "name": "瑞丰银行", "weight": 10, "ind": "银行"},
+            {"code": "300750", "name": "宁德时代", "weight": 22.5},
+        ]},
+        {"events": []},
+    )
+    by = {h["code"]: h for h in shan[-1]["holdings"]}
+    assert by["601528"]["industry"] == "银行" and by["601528"]["industry_source"] == "board_ind"
+    assert not by["300750"].get("industry")
+    feng = parse_feng(
+        {"rebalance_date": "2026-11-20", "codes": ["512800", "510300"]},
+        {"events": []},
+        {"rows": [
+            {"code": "512800", "name": "银行ETF", "sector": "银行"},
+            {"code": "510300", "name": "沪深300ETF"},
+        ]},
+    )
+    by = {h["code"]: h for h in feng[-1]["holdings"]}
+    assert by["512800"]["industry"] == "银行" and by["512800"]["industry_source"] == "board_sector"
+    assert not by["510300"].get("industry")
+    fire = parse_fire(
+        {"rebalance_date": "2026-11-25", "items": [
+            {"code": "000001", "name": "某股", "weight": 100, "theme": "机器人"},
+        ]},
+        {"events": []},
+    )
+    assert not fire[-1]["holdings"][0].get("industry")
+    lin = parse_lin(
+        {"rebalance_date": "2026-11-06", "picks": [
+            {"code": "012060", "name": "富国", "weight": 24.2, "style": "海外"},
+        ]},
+        {"events": []},
+    )
+    assert not lin[-1]["holdings"][0].get("industry")
+    blank = parse_shan(
+        {"rebalance_date": "2026-11-20", "items": [
+            {"code": "601528", "name": "瑞丰银行", "weight": 100, "ind": "其他"},
+        ]},
+        {"events": []},
+    )
+    assert not blank[-1]["holdings"][0].get("industry")
+
+
 CASES = [
     ("未建账不产生净值", test_null_start_date),
     ("A股T+1", test_t_plus_one),
@@ -587,6 +1117,15 @@ CASES = [
     ("名单未变不重复发信号", test_no_repeat_signal_if_holdings_unchanged),
     ("林部公司门槛拦截不合格并不放大仓位", test_lin_company_gate_blocks_unqualified_and_keeps_cash),
     ("行情缓存过期不再复用旧K线", test_market_cache_expires_stale),
+    ("区间与限额状态", test_band_and_limit_status_math),
+    ("待成交与已成交区分", test_ledger_pending_differs_from_filled),
+    ("费用合计与明细一致且港股印花税不编造", test_ledger_fees_match_lines_and_hk_stamp_gap),
+    ("T+1锁定标记", test_t_plus_marks),
+    ("R1距离", test_r1_distance_on_book),
+    ("单票8%与行业30%只报告", test_single_name_and_industry_report_only),
+    ("区间破坏只展示不调仓", test_band_breach_is_display_only),
+    ("空仓与缺数据不编造持仓", test_ledger_does_not_invent_positions),
+    ("行业标签只搬运不猜测", test_industry_label_passthrough_does_not_guess),
 ]
 
 

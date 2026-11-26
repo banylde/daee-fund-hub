@@ -51,6 +51,23 @@ def infer_market(code, kind, market=None):
     return "sz"
 
 
+def industry_fields(raw, source):
+    """只搬运来源里已经写明的行业标签。空值、「其他」「未知」不当成行业，也不从名称猜测。"""
+    if not isinstance(raw, dict):
+        return None
+    ind = raw.get("ind")
+    if ind is None or str(ind).strip() == "":
+        ind = raw.get("industry")
+    if ind is None or str(ind).strip() == "":
+        ind = raw.get("sector")
+    if ind is None:
+        return None
+    text = str(ind).strip()
+    if not text or text in ("其他", "未知", "-", "—"):
+        return None
+    return {"industry": text, "industry_source": source}
+
+
 def _item(code, name, weight, sleeve, market=None, extra=None):
     kind = infer_kind(code, sleeve, market)
     rec = {
@@ -136,10 +153,20 @@ def parse_feng(official, history, latest=None):
             name_by.setdefault(str(h.get("code")), h.get("name"))
         for h in ev.get("entered") or []:
             name_by.setdefault(str(h.get("code")), h.get("name"))
+    sector_by = {}
+    for row in (latest or {}).get("rows") or []:
+        if row.get("code") and row.get("sector"):
+            sector_by[str(row["code"])] = row.get("sector")
+    for ev in events:
+        for h in ev.get("holdings") or []:
+            extra = industry_fields({"sector": sector_by.get(h["code"])}, "board_sector") if sector_by.get(h["code"]) else None
+            if extra:
+                h.update(extra)
     codes = off.get("codes") or []
     n = len(codes)
     for code in codes:
-        holdings.append(_item(code, name_by.get(str(code), str(code)), 100.0 / n if n else 0.0, "feng"))
+        extra = industry_fields({"sector": sector_by.get(str(code))}, "board_sector") if sector_by.get(str(code)) else None
+        holdings.append(_item(code, name_by.get(str(code), str(code)), 100.0 / n if n else 0.0, "feng", extra=extra))
     return _append_official(events, date, _renorm(holdings), off.get("changes") or [], "正式名单")
 
 
@@ -191,7 +218,10 @@ def parse_fire(official, history, latest=None):
             for h in weights:
                 if not isinstance(h, dict) or not h.get("code"):
                     continue
-                holdings.append(_item(h["code"], h.get("name"), parse_weight(h.get("weight")), "fire"))
+                holdings.append(_item(
+                    h["code"], h.get("name"), parse_weight(h.get("weight")), "fire",
+                    extra=industry_fields(h, "board_industry"),
+                ))
         events.append({
             "date": ev["date"][:10],
             "holdings": _renorm(holdings),
@@ -203,7 +233,10 @@ def parse_fire(official, history, latest=None):
     holdings = []
     for h in off.get("items") or []:
         if h.get("code"):
-            holdings.append(_item(h["code"], h.get("name"), parse_weight(h.get("weight")), "fire"))
+            holdings.append(_item(
+                h["code"], h.get("name"), parse_weight(h.get("weight")), "fire",
+                extra=industry_fields(h, "board_industry"),
+            ))
     for code in off.get("codes") or []:
         if not any(x["code"] == str(code) for x in holdings):
             n = len(off.get("codes") or [])
@@ -235,6 +268,7 @@ def parse_shan(official, history, latest=None):
             holdings.append(_item(
                 code, h.get("name") or name_by.get(code),
                 parse_weight(h.get("weight")), "shan", market_by.get(code),
+                industry_fields(h, "board_ind"),
             ))
         events.append({
             "date": ev["date"][:10],
@@ -250,6 +284,7 @@ def parse_shan(official, history, latest=None):
         holdings.append(_item(
             code, h.get("name") or name_by.get(code),
             parse_weight(h.get("weight")), "shan", market_by.get(code),
+            industry_fields(h, "board_ind"),
         ))
     return _append_official(events, date, _renorm(holdings), off.get("changes") or [], "正式名单")
 

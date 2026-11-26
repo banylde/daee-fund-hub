@@ -58,6 +58,16 @@ td.l,th.l{text-align:left}
 footer{margin-top:24px;color:var(--mute);font-size:12px;line-height:18px}
 .tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid var(--line);color:var(--sec);margin-left:6px}
 .warn{color:var(--acc)}
+.subh{font-size:13px;font-weight:500;margin:14px 0 8px}
+.riskgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+@media (max-width:900px){.riskgrid{grid-template-columns:1fr}}
+td.wrapcell{white-space:normal;min-width:16em}
+.pill{display:inline-block;font-size:11px;line-height:16px;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--sec)}
+.pill.bad{color:var(--up);border-color:rgba(229,72,77,.45)}
+.pill.near{color:var(--acc);border-color:rgba(226,211,168,.5)}
+.pill.ok{color:var(--dn);border-color:rgba(63,179,127,.4)}
+.pill.gap{color:var(--mute)}
+.bar.dd>i{background:var(--up);left:0}
 </style>
 </head>
 <body>
@@ -77,6 +87,8 @@ footer{margin-top:24px;color:var(--mute);font-size:12px;line-height:18px}
   <div class="card"><h2>回撤</h2><div class="mute" id="ddnote"></div><div class="chartbox" id="ddchart"></div></div>
 </div>
 <div class="card"><h2>各部贡献与权重</h2><div class="wrap"><table id="wtab"><thead></thead><tbody></tbody></table></div></div>
+<div class="card" id="risk"><h2>风控仪表</h2><div class="mute" id="risknote"></div><div id="riskbody"></div></div>
+<div class="card" id="ledger"><h2>成交台账</h2><div class="mute" id="ledgernote"></div><div id="ledgerbody"></div></div>
 <div class="card"><h2>最近操作</h2><div class="mute" id="lognote">有变动才记；无变动的交易日不写。</div><div class="wrap"><table id="logtab"><thead></thead><tbody></tbody></table></div></div>
 <div class="card"><h2>四个看板</h2><div class="links" id="links"></div></div>
 <div class="card mute" id="rule"></div>
@@ -178,6 +190,202 @@ function drawChart(box,dates,series,mode){
   }catch(e){svgChart(box,dates,series,mode);}
 }
 
+const fmt2=v=>v==null?"—":Number(v).toLocaleString("zh-CN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtSh=v=>{
+  if(v==null||v==="") return "—";
+  const n=Number(v);
+  if(!Number.isFinite(n)) return "—";
+  if(Math.abs(n-Math.round(n))<1e-6) return Math.round(n).toLocaleString("zh-CN");
+  return n.toLocaleString("zh-CN",{maximumFractionDigits:2});
+};
+const fmtDist=v=>{
+  if(v==null||!Number.isFinite(Number(v))) return "—";
+  const pts=Number(v)*100;
+  return pts>=-1e-9?"还有 "+pts.toFixed(2)+" 个百分点":"已越过 "+Math.abs(pts).toFixed(2)+" 个百分点";
+};
+function pill(status){
+  const bad=["超过","高于上限","低于下限","已触及"];
+  const near=["接近","接近边界","待成交","顺延","T+1锁定","部分锁定"];
+  const gap=["缺价","无权重","无法判断","占比不完整"];
+  const ok=["未接近","区间内","可卖","T+0 当日可卖","未触及"];
+  const kind=bad.includes(status)?"bad":near.includes(status)?"near":gap.includes(status)?"gap":ok.includes(status)?"ok":"";
+  return `<span class="pill ${kind}">${esc(status||"—")}</span>`;
+}
+function sleeveLabel(id, weights){
+  const row=(weights||[]).find(w=>w.id===id);
+  return row?(row.board||"")+" "+(row.name||""): (id||"");
+}
+function actionName(action){
+  return {warn:"预警",reduce:"降仓",restore:"恢复"}[action]||action||"";
+}
+function emptyTable(cols, text){
+  return `<tr><td class="l" colspan="${cols}">${esc(text)}</td></tr>`;
+}
+function renderRisk(d){
+  const note=document.getElementById("risknote");
+  const host=document.getElementById("riskbody");
+  const risk=d.risk;
+  if(!risk){
+    note.textContent="本次 summary 还没有风控仪表字段。页面不现算，也不编造回撤或持仓。下一次交易日数据更新写入后会显示。";
+    host.innerHTML="";
+    return;
+  }
+  const dd=risk.drawdown||{};
+  const levels=dd.levels||[];
+  const max=Math.max(0.2, ...levels.map(l=>Number(l.drawdown)||0), 0.2);
+  const mag=dd.magnitude;
+  const width=mag==null?0:Math.max(0,Math.min(100, mag/max*100));
+  const ticks=levels.map(l=>`<span style="left:${(Number(l.drawdown)/max*100).toFixed(2)}%"></span>`).join("");
+  const active=dd.active;
+  let head=mag==null?"尚未产生回撤。":(active?`当前回撤 ${(mag*100).toFixed(2)}%，落在 ${(active.drawdown*100).toFixed(0)}% 档（${actionName(active.action)}）。`:`当前回撤 ${(mag*100).toFixed(2)}%，尚未触及任一档。`);
+  if(dd.enabled===false) head+="降仓开关关闭，本页也不会因此调仓。";
+  if(dd.reduced && dd.restore_nav!=null) head+=` 恢复线净值 ${fmtN(dd.restore_nav)}（收复一半回撤）。`;
+  const levelRows=levels.length?levels.map(l=>`<tr>
+    <td class="l">${(Number(l.drawdown)*100).toFixed(0)}%</td>
+    <td class="l">${esc(actionName(l.action))}</td>
+    <td>${fmtDist(l.distance)}</td>
+    <td class="l">${pill(l.reached?"已触及":"未触及")}</td>
+    <td class="l">${esc(l.note||"")}</td></tr>`).join(""):emptyTable(5,"规则里没有回撤档位。");
+  const bands=risk.bands||[];
+  const showTemp=bands.some(b=>b.active_target!=null && Math.abs(Number(b.active_target)-Number(b.target))>1e-9);
+  const bandRows=bands.length?bands.map(b=>{
+    const temp=showTemp?`<td>${b.active_target==null?"—":(Number(b.active_target)*100).toFixed(0)+"%"}${Math.abs(Number(b.active_target)-Number(b.target))>1e-9?" 临时":""}</td>`:"";
+    return `<tr>
+      <td class="l">${esc((b.board||"")+" "+(b.name||b.id||""))}</td>
+      <td>${b.target==null?"—":(Number(b.target)*100).toFixed(0)+"%"}</td>
+      <td>${b.low==null?"—":(Number(b.low)*100).toFixed(0)+"%–"+(Number(b.high)*100).toFixed(0)+"%"}</td>
+      <td>${fmtP(b.weight)}</td>
+      <td>${fmtDist(b.distance_to_low)}</td>
+      <td>${fmtDist(b.distance_to_high)}</td>
+      <td class="l">${pill(b.status)}</td>${temp}</tr>`;
+  }).join(""):emptyTable(showTemp?8:7,"没有子组合。");
+  const single=risk.single_stock||{};
+  const srows=single.rows||[];
+  const singleBody=srows.length?srows.map(r=>`<tr>
+    <td class="l">${esc(r.code||"")}</td>
+    <td class="l">${esc(r.name||"")}</td>
+    <td>${fmtY(r.market_value)}</td>
+    <td>${r.weight_of_total==null?"—":fmtP(r.weight_of_total)}</td>
+    <td class="l">${pill(r.status)}</td></tr>`).join("")
+    :emptyTable(5, single.empty?(d.started?"火部当前无证券持仓，不编造单票占比。":"未建账，不编造火部持仓。"):"没有可计算的火部持仓。");
+  const ind=risk.industry||{};
+  const irows=ind.rows||[];
+  const indBody=irows.length?irows.map(r=>`<tr>
+    <td class="l">${esc(r.industry||"")}</td>
+    <td>${fmtY(r.market_value)}</td>
+    <td>${r.weight_of_total==null?"—":fmtP(r.weight_of_total)}</td>
+    <td class="l">${esc((r.positions||[]).map(p=>(p.name||p.code)).join("、"))}</td>
+    <td class="l">${pill(r.status)}</td></tr>`).join("")
+    :emptyTable(5,"没有可加总的行业标签。");
+  const unclassified=(ind.unclassified||[]).map(u=>esc(u.name||u.code)+"（"+esc(sleeveLabel(u.sleeve,d.weights).trim())+"，"+esc(u.reason||"行业分类缺失")+"）").join("；");
+  const incomplete=(ind.incomplete||[]).map(u=>esc(u.name||u.code)+"（"+esc(u.reason||"缺价")+"）").join("；");
+  const fresh=risk.freshness||{};
+  const lag=(fresh.lagging||[]).map(x=>`${x.name||x.code} ${x.reason||""}`).join("；");
+  const gapText=(risk.gaps||[]).map(g=>g.reason||g).filter(Boolean);
+  note.textContent=(risk.note||"超线只展示，不自动调仓。")+" "+(risk.band_note||"");
+  host.innerHTML=`
+    <div class="mute">${esc(head)} 数据时点 ${esc(fresh.asof||d.asof||"—")}，更新于 ${esc(fresh.updated_at||d.updated_at||"—")}（北京时间）。${esc(fresh.note||"")}</div>
+    <div class="riskgrid">
+      <div>
+        <div class="subh">回撤与 R1 档位</div>
+        <div class="mute" style="margin-bottom:8px"><span class="bar dd">${ticks}<i style="width:${width.toFixed(2)}%"></i></span></div>
+        <div class="wrap"><table><thead><tr><th class="l">档位</th><th class="l">动作</th><th>距离</th><th class="l">状态</th><th class="l">说明</th></tr></thead><tbody>${levelRows}</tbody></table></div>
+      </div>
+      <div>
+        <div class="subh">各部权重与 ±5 区间</div>
+        <div class="wrap"><table><thead><tr><th class="l">子组合</th><th>目标</th><th>允许区间</th><th>当前</th><th>距下限</th><th>距上限</th><th class="l">状态</th>${showTemp?"<th>临时目标</th>":""}</tr></thead><tbody>${bandRows}</tbody></table></div>
+      </div>
+    </div>
+    <div class="subh">火部单票 / 总账户 ${((single.limit||0.08)*100).toFixed(0)}%（接近线 ${((single.near_at||0)*100).toFixed(1)}%）</div>
+    <div class="wrap"><table><thead><tr><th class="l">代码</th><th class="l">名称</th><th>市值</th><th>占总账户</th><th class="l">状态</th></tr></thead><tbody>${singleBody}</tbody></table></div>
+    <div class="subh">行业穿透 / 总账户 ${((ind.limit||0.3)*100).toFixed(0)}%（接近线 ${((ind.near_at||0)*100).toFixed(1)}%，只报告）</div>
+    <div class="mute">${esc(ind.method||"")}</div>
+    <div class="wrap"><table><thead><tr><th class="l">行业</th><th>市值</th><th>占总账户</th><th class="l">持仓</th><th class="l">状态</th></tr></thead><tbody>${indBody}</tbody></table></div>
+    ${unclassified?`<p class="warn">未分类：${unclassified}</p>`:""}
+    ${incomplete?`<p class="warn">有标签但缺价：${incomplete}</p>`:""}
+    <div class="subh">时点、滞后与缺口</div>
+    <p class="mute">${lag?esc("滞后或缺口："+lag):esc(d.started?"已列出的持仓都有截止日价格。":"未建账，没有持仓时点。")} 全局数据缺口 ${(d.gaps||[]).length} 条，见下方口径。</p>
+    ${gapText.length?`<p class="warn">${gapText.map(esc).join("；")}</p>`:""}`;
+}
+function renderLedger(d){
+  const note=document.getElementById("ledgernote");
+  const host=document.getElementById("ledgerbody");
+  const ledger=d.ledger;
+  if(!ledger){
+    note.textContent="本次 summary 还没有成交台账字段。页面不根据旧名单或截断后的成交记录补写持仓。下一次交易日数据更新写入后会显示。";
+    host.innerHTML="";
+    return;
+  }
+  note.textContent=ledger.note||"账本来自本次模拟。";
+  const pending=ledger.pending||[];
+  const filled=ledger.filled||[];
+  const locks=ledger.locks||[];
+  const names=id=>esc(sleeveLabel(id,d.weights).trim()||id||"");
+  const sideName={buy:"买入",sell:"卖出",adjust:"调仓"};
+  const pendRows=pending.length?pending.map(p=>{
+    const weight=p.status==="macro"&&p.targets
+      ?Object.keys(p.targets).map(k=>sleeveLabel(k,d.weights).trim()+" "+(Number(p.targets[k])*100).toFixed(0)+"%").join(" / ")
+      :(p.target_weight==null?"—":Number(p.target_weight).toFixed(1)+"%");
+    return `<tr>
+      <td class="l">${esc(p.since||"")}</td>
+      <td class="l">${pill(p.status==="deferred"?"顺延":"待成交")}</td>
+      <td class="l">${p.sleeve?names(p.sleeve):esc(p.sleeve_name||"总账户")}</td>
+      <td class="l">${esc(p.code||"—")}</td>
+      <td class="l">${esc(p.name||"")}</td>
+      <td class="l">${esc(sideName[p.side]||(p.status==="macro"?"大类":"—"))}</td>
+      <td class="l">${esc(weight)}</td>
+      <td>${fmtSh(p.current_shares)}</td>
+      <td class="l wrapcell">${esc(p.reason||"")}</td></tr>`;
+  }).join(""):emptyTable(9, d.started?"没有待成交，也没有涨跌停顺延。":"尚未建账，没有待成交。");
+  const fillRows=filled.length?filled.map(t=>`<tr>
+    <td class="l">${esc(t.date||"")}</td>
+    <td class="l">${names(t.sleeve)}</td>
+    <td class="l">${esc(t.code||"")}</td>
+    <td class="l">${esc(t.name||"")}</td>
+    <td class="l">${esc(sideName[t.side]||t.side||"")}</td>
+    <td>${fmtSh(t.shares)}</td>
+    <td>${t.price==null?"—":Number(t.price).toLocaleString("zh-CN",{maximumFractionDigits:4})}</td>
+    <td>${fmt2(t.notional)}</td>
+    <td>${fmt2(t.commission)}</td>
+    <td>${fmt2(t.stamp)}</td>
+    <td>${fmt2(t.slippage)}</td>
+    <td class="l wrapcell">${esc(t.note||"")}</td></tr>`).join("")
+    :emptyTable(12, d.started?"还没有已成交。":"尚未建账，没有成交。");
+  const fees=ledger.fees||{};
+  const sum=k=>filled.reduce((a,t)=>a+Number(t[k]||0),0);
+  const drift=Math.abs((sum("commission")+sum("stamp")+sum("slippage"))-Number(fees.total||0));
+  const feeLine=filled.length
+    ?`佣金 ${fmt2(fees.commission)}，印花税 ${fmt2(fees.stamp)}，滑点 ${fmt2(fees.slippage)}，合计 ${fmt2(fees.total)}。${drift<0.02?"与成交明细一致。":"页面复算与引擎合计不一致。"}`
+    :"";
+  const lockRows=locks.length?locks.map(row=>{
+    const buys=(row.lots||[]).map(l=>`${l.buy_date||"—"}${l.locked?"锁定":"可卖"}`).join("、");
+    const ons=[...new Set((row.lots||[]).map(l=>l.sellable_on).filter(Boolean))].join("、");
+    return `<tr>
+      <td class="l">${names(row.sleeve)}</td>
+      <td class="l">${esc(row.code||"")}</td>
+      <td class="l">${esc(row.name||"")}</td>
+      <td class="l">${pill(row.status)}</td>
+      <td>${fmtSh(row.shares)}</td>
+      <td>${fmtSh(row.locked_shares)}</td>
+      <td>${fmtSh(row.sellable_shares)}</td>
+      <td class="l">${esc(buys||"—")}</td>
+      <td class="l">${esc(ons||"—")}</td></tr>`;
+  }).join(""):emptyTable(9, d.started?"无证券持仓，无 T+1 锁定。":"尚未建账，无锁定。");
+  const empties=(ledger.empty_sleeves||[]).map(s=>`${s.board||""} ${s.name||s.id}`.trim()).filter(Boolean);
+  const notes=(ledger.notes||[]).map(esc);
+  const gaps=(ledger.gaps||[]).map(g=>g.reason||g).filter(Boolean);
+  host.innerHTML=`
+    ${notes.map(t=>`<p class="mute">${t}</p>`).join("")}
+    ${empties.length?`<p class="mute">${esc(empties.join("、"))} 无证券持仓，不编造。</p>`:""}
+    <div class="subh">待成交</div>
+    <div class="wrap"><table><thead><tr><th class="l">自</th><th class="l">状态</th><th class="l">子组合</th><th class="l">代码</th><th class="l">名称</th><th class="l">方向</th><th class="l">部内目标 / 大类目标</th><th>当前股数</th><th class="l">原因</th></tr></thead><tbody>${pendRows}</tbody></table></div>
+    <div class="subh">已成交</div>
+    <div class="wrap"><table><thead><tr><th class="l">日期</th><th class="l">子组合</th><th class="l">代码</th><th class="l">名称</th><th class="l">方向</th><th>数量</th><th>成交价</th><th>成交额</th><th>佣金</th><th>印花税</th><th>滑点</th><th class="l">说明</th></tr></thead><tbody>${fillRows}</tbody></table></div>
+    ${feeLine?`<p class="mute">${esc(feeLine)} 印花税列只含 A 股股票卖出。</p>`:""}
+    <div class="subh">T+1 锁定</div>
+    <div class="wrap"><table><thead><tr><th class="l">子组合</th><th class="l">代码</th><th class="l">名称</th><th class="l">状态</th><th>数量</th><th>锁定</th><th>可卖</th><th class="l">批次</th><th class="l">可卖日</th></tr></thead><tbody>${lockRows}</tbody></table></div>
+    ${gaps.length?`<p class="warn">${gaps.map(esc).join("；")}</p>`:""}`;
+}
 function render(d){
   const started=!!d.started;
   const w=d.weights||[];
@@ -235,6 +443,9 @@ function render(d){
       <td class="l">${bar}</td></tr>`;
   }).join("");
 
+  renderRisk(d);
+  renderLedger(d);
+
   const logs=(d.logs||[]).slice(-10).reverse();
   document.querySelector("#logtab thead").innerHTML=`<tr><th class="l">日期</th><th class="l">类型</th><th class="l">说明</th><th class="l">状态</th></tr>`;
   document.querySelector("#logtab tbody").innerHTML=logs.length?logs.map(lg=>`<tr>
@@ -249,6 +460,7 @@ function render(d){
   const r=d.rules||{};
   document.getElementById("rule").innerHTML=`<h2>口径</h2>
     <p>${esc(r.fill||"")} ${esc(r.costs||"")} ${esc(r.t_plus||"")} ${esc(r.rebalance||"")} ${ddnote}</p>
+    ${r.limits?`<p>${esc(r.limits)} 仪表上的超线不额外调仓。</p>`:""}
     ${gaps.length?`<p class="warn">数据缺口：${gaps.map(esc).join("；")}</p>`:""}
     <p>来源：${esc((d.sources||[]).join(" / ")||"—")}</p>`;
 }
@@ -260,6 +472,10 @@ fetch("data/summary.json",{cache:"no-store"}).then(r=>{
   document.getElementById("meta").textContent="无法读取 data/summary.json（"+err.message+"）。若在本地打开文件，请先在本目录运行 python3 -m http.server。";
   placeholder(document.getElementById("navchart"),[]);
   placeholder(document.getElementById("ddchart"),[]);
+  const riskNote=document.getElementById("risknote");
+  const ledgerNote=document.getElementById("ledgernote");
+  if(riskNote) riskNote.textContent="无法读取数据，不展示风控仪表。";
+  if(ledgerNote) ledgerNote.textContent="无法读取数据，不展示成交台账。";
 });
 </script>
 </body></html>

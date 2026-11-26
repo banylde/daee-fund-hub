@@ -94,6 +94,7 @@ def collect_instruments(events_by_sleeve, start):
 def build_summary(rules, result, docs, sources, gaps, board_errors):
     sleeves_cfg = rules["sleeves"]
     started = bool(result.get("started"))
+    updated = now_bj()
     official, _ = official_snapshot(docs, rules) if docs else ({}, {})
     curves = []
     for row in result.get("curves") or []:
@@ -142,6 +143,9 @@ def build_summary(rules, result, docs, sources, gaps, board_errors):
         all_gaps.append({"reason": "看板公开数据读取失败: %s" % err})
 
     dd_cfg = rules.get("drawdown_delever") or {}
+    risk = result.get("risk")
+    if isinstance(risk, dict) and isinstance(risk.get("freshness"), dict):
+        risk["freshness"]["updated_at"] = updated
     return {
         "disclaimer": rules.get("disclaimer") or DISCLAIMER,
         "status": result.get("status") or ("ok" if started else "not_started"),
@@ -149,7 +153,7 @@ def build_summary(rules, result, docs, sources, gaps, board_errors):
         "reason": result.get("reason"),
         "start_date": result.get("start_date") if started else rules.get("start_date"),
         "asof": result.get("asof") if started else None,
-        "updated_at": now_bj(),
+        "updated_at": updated,
         "timezone": "Asia/Shanghai",
         "currency": rules.get("currency") or "CNY",
         "initial_cash": rules.get("initial_cash"),
@@ -185,7 +189,11 @@ def build_summary(rules, result, docs, sources, gaps, board_errors):
             "costs": "佣金万 3、滑点 0.1%；A 股股票卖出印花税 0.05%；ETF 与场外基金不收印花税。",
             "t_plus": "A 股、ETF、场外基金 T+1 可卖；港股当日可卖。卖出资金当日可用。",
             "rebalance": "季末检查；任一部偏离目标超过允许区间则拉回目标。",
+            "limits": (rules.get("position_limits") or {}).get("note")
+            or "火部单票不超过总账户 8%；穿透后单一行业不超过 30%，只报告，不强制调仓。",
         },
+        "ledger": result.get("ledger"),
+        "risk": risk,
         "sources": sources,
         "gaps": all_gaps,
         "pending_macro": result.get("pending_macro"),

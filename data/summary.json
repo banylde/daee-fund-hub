@@ -4,16 +4,16 @@
   "started": true,
   "reason": null,
   "start_date": "2026-11-16",
-  "asof": "2026-11-26",
-  "updated_at": "2026-11-27 03:22",
+  "asof": "2026-11-27",
+  "updated_at": "2026-11-28 03:16",
   "timezone": "Asia/Shanghai",
   "currency": "CNY",
   "initial_cash": 5000000,
-  "nav": 0.965595884,
-  "equity": 4827979.42,
+  "nav": 0.9762277380000001,
+  "equity": 4881138.69,
   "hub_cash": 0.0,
-  "drawdown": -0.03440411600000004,
-  "max_drawdown": -0.03440411600000004,
+  "drawdown": -0.023772261999999933,
+  "max_drawdown": -0.03424114199999995,
   "peak_nav": 1.0,
   "weights": [
     {
@@ -25,13 +25,13 @@
       "band": 0.05,
       "low": 0.25,
       "high": 0.35,
-      "weight": 0.28807545124125655,
-      "equity": 1390822.35,
-      "nav": 0.9272149000000001,
+      "weight": 0.29163715485412683,
+      "equity": 1423521.4,
+      "nav": 0.9490142666666666,
       "cash": 3775.16,
-      "contribution": -0.02183552999999998,
+      "contribution": -0.015295720000000018,
       "official": {
-        "asof": "2026-11-20",
+        "asof": "2026-11-27",
         "holdings": [
           {
             "code": "603605",
@@ -52,21 +52,21 @@
             "industry_source": "board_ind"
           },
           {
-            "code": "03998",
-            "name": "波司登",
-            "weight": 22.5,
-            "kind": "hk_stock",
-            "market": "hk",
-            "industry": "纺织服饰",
-            "industry_source": "board_ind"
-          },
-          {
             "code": "601528",
             "name": "瑞丰银行",
             "weight": 10.0,
             "kind": "ashare_stock",
             "market": "sh",
             "industry": "银行",
+            "industry_source": "board_ind"
+          },
+          {
+            "code": "03998",
+            "name": "波司登",
+            "weight": 22.5,
+            "kind": "hk_stock",
+            "market": "hk",
+            "industry": "纺织服饰",
             "industry_source": "board_ind"
           },
           {
@@ -91,17 +91,16 @@
       "band": 0.05,
       "low": 0.25,
       "high": 0.35,
-      "weight": 0.3106889796974321,
+      "weight": 0.3073053431309078,
       "equity": 1500000.0,
       "nav": 1.0,
       "cash": 1500000.0,
       "contribution": 0.0,
       "official": {
-        "asof": "2026-11-26",
+        "asof": "2026-11-27",
         "holdings": [],
         "changes": [
           "没有题材同时通过催化、梯队、容量、天数",
-          "情绪退潮，新开仓压到半仓以下（最多1只、7.5%）",
           "四王留空，不凑数"
         ]
       }
@@ -115,14 +114,41 @@
       "band": 0.05,
       "low": 0.15000000000000002,
       "high": 0.25,
-      "weight": 0.1978903153650974,
-      "equity": 955410.37,
-      "nav": 0.95541037,
+      "weight": 0.19757526496343006,
+      "equity": 964392.27,
+      "nav": 0.96439227,
       "cash": 651.67,
-      "contribution": -0.008917926000000001,
+      "contribution": -0.007121545999999996,
       "official": {
-        "asof": "2026-11-20",
+        "asof": "2026-11-27",
         "holdings": [
+          {
+            "code": "512010",
+            "name": "医药ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh",
+            "industry": "医药",
+            "industry_source": "board_sector"
+          },
+          {
+            "code": "159996",
+            "name": "家电ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sz",
+            "industry": "家电",
+            "industry_source": "board_sector"
+          },
+          {
+            "code": "512070",
+            "name": "证券保险ETF",
+            "weight": 12.5,
+            "kind": "etf",
+            "market": "sh",
+            "industry": "非银",
+            "industry_source": "board_sector"
+          },
           {
             "code": "512800",
             "name": "银行ETF",
@@ -142,12 +168,12 @@
             "industry_source": "board_sector"
           },
           {
-            "code": "510880",
-            "name": "红利ETF",
+            "code": "512880",
+            "name": "证券ETF",
             "weight": 12.5,
             "kind": "etf",
             "market": "sh",
-            "industry": "红利",
+            "industry": "证券",
             "industry_source": "board_sector"
           },
           {
@@ -160,46 +186,19 @@
             "industry_source": "board_sector"
           },
           {
-            "code": "512070",
-            "name": "证券保险ETF",
+            "code": "512480",
+            "name": "半导体ETF",
             "weight": 12.5,
             "kind": "etf",
             "market": "sh",
-            "industry": "非银",
-            "industry_source": "board_sector"
-          },
-          {
-            "code": "159996",
-            "name": "家电ETF",
-            "weight": 12.5,
-            "kind": "etf",
-            "market": "sz",
-            "industry": "家电",
-            "industry_source": "board_sector"
-          },
-          {
-            "code": "159930",
-            "name": "能源ETF",
-            "weight": 12.5,
-            "kind": "etf",
-            "market": "sz",
-            "industry": "石油/能源",
-            "industry_source": "board_sector"
-          },
-          {
-            "code": "159825",
-            "name": "农业ETF",
-            "weight": 12.5,
-            "kind": "etf",
-            "market": "sz",
-            "industry": "农业",
+            "industry": "半导体",
             "industry_source": "board_sector"
           }
         ],
         "changes": [
-          "红利ETF(92.9) 替换 传媒ETF(32.1)",
-          "证券保险ETF(79.6) 替换 医疗ETF(46.8)",
-          "能源ETF(62.1) 替换 汽车ETF(51.1)"
+          "医药ETF(86.4) 替换 能源ETF(22.9)",
+          "证券ETF(67.5) 替换 红利ETF(42.5)",
+          "半导体ETF(57.5) 替换 农业ETF(47.5)"
         ]
       }
     },
@@ -212,11 +211,11 @@
       "band": 0.05,
       "low": 0.15000000000000002,
       "high": 0.25,
-      "weight": 0.20334525369621398,
-      "equity": 981746.7,
-      "nav": 0.9817467,
+      "weight": 0.20348223705153518,
+      "equity": 993225.02,
+      "nav": 0.99322502,
       "cash": 326798.14,
-      "contribution": -0.003650660000000009,
+      "contribution": -0.0013549959999999963,
       "official": {
         "asof": "2026-11-16",
         "holdings": [
@@ -280,10 +279,10 @@
     }
   ],
   "contribution": {
-    "shan": -0.02183552999999998,
+    "shan": -0.015295720000000018,
     "fire": 0.0,
-    "feng": -0.008917926000000001,
-    "lin": -0.003650660000000009
+    "feng": -0.007121545999999996,
+    "lin": -0.0013549959999999963
   },
   "curves": [
     {
@@ -314,7 +313,8 @@
           "equity": 1000000.0
         }
       },
-      "hs300tr": 1.0
+      "hs300tr": 1.0,
+      "equity_fund": 1.0
     },
     {
       "date": "2026-11-17",
@@ -344,7 +344,8 @@
           "equity": 999110.29
         }
       },
-      "hs300tr": 0.9991607618473289
+      "hs300tr": 0.9991607618473289,
+      "equity_fund": 0.9972123277063651
     },
     {
       "date": "2026-11-18",
@@ -374,7 +375,8 @@
           "equity": 998095.93
         }
       },
-      "hs300tr": 1.0009975375647018
+      "hs300tr": 1.0009975375647018,
+      "equity_fund": 0.9756430653131908
     },
     {
       "date": "2026-11-19",
@@ -404,7 +406,8 @@
           "equity": 994591.99
         }
       },
-      "hs300tr": 1.001266395296246
+      "hs300tr": 1.001266395296246,
+      "equity_fund": 0.9606135694876596
     },
     {
       "date": "2026-11-20",
@@ -434,7 +437,8 @@
           "equity": 986170.06
         }
       },
-      "hs300tr": 0.9936604854515302
+      "hs300tr": 0.9936604854515302,
+      "equity_fund": 0.9291325833837836
     },
     {
       "date": "2026-11-23",
@@ -464,7 +468,8 @@
           "equity": 989441.84
         }
       },
-      "hs300tr": 0.9945952057892355
+      "hs300tr": 0.9945952057892355,
+      "equity_fund": 0.9398045813563856
     },
     {
       "date": "2026-11-24",
@@ -494,7 +499,8 @@
           "equity": 988889.23
         }
       },
-      "hs300tr": 0.9959847228503945
+      "hs300tr": 0.9959847228503945,
+      "equity_fund": 0.9225013023216524
     },
     {
       "date": "2026-11-25",
@@ -524,37 +530,70 @@
           "equity": 981814.23
         }
       },
-      "hs300tr": 0.9795065078647167
+      "hs300tr": 0.9795065078647167,
+      "equity_fund": 0.9084080701704986
     },
     {
       "date": "2026-11-26",
-      "nav": 0.965595884,
-      "drawdown": -0.03440411600000004,
-      "equity": 4827979.42,
+      "nav": 0.965758858,
+      "drawdown": -0.03424114199999995,
+      "equity": 4828794.29,
       "hub_cash": 0.0,
       "sleeves": {
         "shan": {
           "nav": 0.9272149000000001,
-          "weight": 0.28807545124125655,
+          "weight": 0.2880268378547971,
           "equity": 1390822.35
         },
         "fire": {
           "nav": 1.0,
-          "weight": 0.3106889796974321,
+          "weight": 0.31063655022670267,
           "equity": 1500000.0
         },
         "feng": {
           "nav": 0.95541037,
-          "weight": 0.1978903153650974,
+          "weight": 0.19785692092507837,
           "equity": 955410.37
         },
         "lin": {
-          "nav": 0.9817467,
-          "weight": 0.20334525369621398,
-          "equity": 981746.7
+          "nav": 0.98256157,
+          "weight": 0.20347969099342186,
+          "equity": 982561.57
         }
       },
-      "hs300tr": 0.9800869390421629
+      "hs300tr": 0.9800869390421629,
+      "equity_fund": 0.9061976431497881
+    },
+    {
+      "date": "2026-11-27",
+      "nav": 0.9762277380000001,
+      "drawdown": -0.023772261999999933,
+      "equity": 4881138.69,
+      "hub_cash": 0.0,
+      "sleeves": {
+        "shan": {
+          "nav": 0.9490142666666666,
+          "weight": 0.29163715485412683,
+          "equity": 1423521.4
+        },
+        "fire": {
+          "nav": 1.0,
+          "weight": 0.3073053431309078,
+          "equity": 1500000.0
+        },
+        "feng": {
+          "nav": 0.96439227,
+          "weight": 0.19757526496343006,
+          "equity": 964392.27
+        },
+        "lin": {
+          "nav": 0.99322502,
+          "weight": 0.20348223705153518,
+          "equity": 993225.02
+        }
+      },
+      "hs300tr": 1.0209206492788583,
+      "equity_fund": 0.9395018795669252
     }
   ],
   "benchmarks": {
@@ -692,7 +731,7 @@
       "type": "sleeve_trade",
       "sleeve": "feng",
       "status": "signal",
-      "reason": "正式名单",
+      "reason": "红利ETF(92.9) 替换 传媒ETF(32.1)；证券保险ETF(79.6) 替换 医疗ETF(46.8)；能源ETF(62.1) 替换 汽车ETF(51.1)",
       "changes": [
         "红利ETF(92.9) 替换 传媒ETF(32.1)",
         "证券保险ETF(79.6) 替换 医疗ETF(46.8)",
@@ -737,6 +776,61 @@
         {
           "code": "159825",
           "name": "农业ETF",
+          "weight": 12.5
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "date": "2026-11-27",
+      "type": "sleeve_trade",
+      "sleeve": "feng",
+      "status": "signal",
+      "reason": "正式名单",
+      "changes": [
+        "医药ETF(86.4) 替换 能源ETF(22.9)",
+        "证券ETF(67.5) 替换 红利ETF(42.5)",
+        "半导体ETF(57.5) 替换 农业ETF(47.5)"
+      ],
+      "holdings": [
+        {
+          "code": "512010",
+          "name": "医药ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159996",
+          "name": "家电ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512070",
+          "name": "证券保险ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512800",
+          "name": "银行ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159928",
+          "name": "消费ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512880",
+          "name": "证券ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512690",
+          "name": "酒ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512480",
+          "name": "半导体ETF",
           "weight": 12.5
         }
       ],
@@ -1243,7 +1337,7 @@
   },
   "ledger": {
     "schema": "ledger-v1",
-    "asof": "2026-11-26",
+    "asof": "2026-11-27",
     "note": "账本来自本次模拟的成交、信号和持仓，不是子组合旧纸面账户，也不是券商交割。",
     "filled": [
       {
@@ -1760,7 +1854,151 @@
         "fee_total": 194.82
       }
     ],
-    "pending": [],
+    "pending": [
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "159825",
+        "name": "农业ETF",
+        "side": "sell",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 0,
+        "current_shares": 170000.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "159928",
+        "name": "消费ETF",
+        "side": "adjust",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 171500.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "159930",
+        "name": "能源ETF",
+        "side": "sell",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 0,
+        "current_shares": 70800.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "159996",
+        "name": "家电ETF",
+        "side": "adjust",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 89900.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "510880",
+        "name": "红利ETF",
+        "side": "sell",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 0,
+        "current_shares": 35100.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512010",
+        "name": "医药ETF",
+        "side": "buy",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 0.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512070",
+        "name": "证券保险ETF",
+        "side": "adjust",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 158800.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512480",
+        "name": "半导体ETF",
+        "side": "buy",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 0.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512690",
+        "name": "酒ETF",
+        "side": "adjust",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 279600.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512800",
+        "name": "银行ETF",
+        "side": "adjust",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 130100.0,
+        "kind": "etf"
+      },
+      {
+        "status": "signal",
+        "sleeve": "feng",
+        "sleeve_name": "风部",
+        "code": "512880",
+        "name": "证券ETF",
+        "side": "buy",
+        "since": "2026-11-27",
+        "reason": "已发信号尚未成交，待次日开盘。股数与价格待开盘确定，不估算。信号：正式名单",
+        "target_weight": 12.5,
+        "current_shares": 0.0,
+        "kind": "etf"
+      }
+    ],
     "locks": [
       {
         "sleeve": "shan",
@@ -2077,11 +2315,11 @@
         "shares": 86592.0,
         "industry": null,
         "industry_source": null,
-        "close": 4.405,
-        "price_date": "2026-11-26",
+        "close": 4.425,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 324603.53
+        "market_value": 326077.33
       },
       {
         "sleeve": "shan",
@@ -2092,11 +2330,11 @@
         "shares": 37915.0,
         "industry": null,
         "industry_source": null,
-        "close": 9.665,
-        "price_date": "2026-11-26",
+        "close": 9.745,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 311847.65
+        "market_value": 314428.91
       },
       {
         "sleeve": "shan",
@@ -2107,11 +2345,11 @@
         "shares": 1400.0,
         "industry": null,
         "industry_source": null,
-        "close": 204.22,
-        "price_date": "2026-11-26",
+        "close": 215.89,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 285908.0
+        "market_value": 302246.0
       },
       {
         "sleeve": "shan",
@@ -2122,11 +2360,11 @@
         "shares": 26600.0,
         "industry": null,
         "industry_source": null,
-        "close": 5.38,
-        "price_date": "2026-11-26",
+        "close": 5.34,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 143108.0
+        "market_value": 142044.0
       },
       {
         "sleeve": "shan",
@@ -2137,11 +2375,11 @@
         "shares": 7000.0,
         "industry": null,
         "industry_source": null,
-        "close": 45.94,
-        "price_date": "2026-11-26",
+        "close": 47.85,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 321580.0
+        "market_value": 334950.0
       },
       {
         "sleeve": "feng",
@@ -2152,11 +2390,11 @@
         "shares": 170000.0,
         "industry": "农业",
         "industry_source": "board_sector",
-        "close": 0.695,
-        "price_date": "2026-11-26",
+        "close": 0.702,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 118150.0
+        "market_value": 119340.0
       },
       {
         "sleeve": "feng",
@@ -2167,11 +2405,11 @@
         "shares": 171500.0,
         "industry": "消费",
         "industry_source": "board_sector",
-        "close": 0.693,
-        "price_date": "2026-11-26",
+        "close": 0.695,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 118849.5
+        "market_value": 119192.5
       },
       {
         "sleeve": "feng",
@@ -2182,11 +2420,11 @@
         "shares": 70800.0,
         "industry": "石油/能源",
         "industry_source": "board_sector",
-        "close": 1.687,
-        "price_date": "2026-11-26",
+        "close": 1.673,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 119439.6
+        "market_value": 118448.4
       },
       {
         "sleeve": "feng",
@@ -2197,11 +2435,11 @@
         "shares": 89900.0,
         "industry": "家电",
         "industry_source": "board_sector",
-        "close": 1.348,
-        "price_date": "2026-11-26",
+        "close": 1.385,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 121185.2
+        "market_value": 124511.5
       },
       {
         "sleeve": "feng",
@@ -2212,11 +2450,11 @@
         "shares": 35100.0,
         "industry": "红利",
         "industry_source": "board_sector",
-        "close": 3.407,
-        "price_date": "2026-11-26",
+        "close": 3.395,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 119585.7
+        "market_value": 119164.5
       },
       {
         "sleeve": "feng",
@@ -2227,11 +2465,11 @@
         "shares": 158800.0,
         "industry": "非银",
         "industry_source": "board_sector",
-        "close": 0.735,
-        "price_date": "2026-11-26",
+        "close": 0.769,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 116718.0
+        "market_value": 122117.2
       },
       {
         "sleeve": "feng",
@@ -2242,11 +2480,11 @@
         "shares": 279600.0,
         "industry": "白酒",
         "industry_source": "board_sector",
-        "close": 0.43,
-        "price_date": "2026-11-26",
+        "close": 0.437,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 120228.0
+        "market_value": 122185.2
       },
       {
         "sleeve": "feng",
@@ -2257,11 +2495,11 @@
         "shares": 130100.0,
         "industry": "银行",
         "industry_source": "board_sector",
-        "close": 0.927,
-        "price_date": "2026-11-26",
+        "close": 0.913,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 120602.7
+        "market_value": 118781.3
       },
       {
         "sleeve": "lin",
@@ -2287,11 +2525,11 @@
         "shares": 208548.08,
         "industry": null,
         "industry_source": null,
-        "close": 1.2373,
-        "price_date": "2026-11-26",
+        "close": 1.2436,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 258036.54
+        "market_value": 259350.39
       },
       {
         "sleeve": "lin",
@@ -2302,11 +2540,11 @@
         "shares": 83627.85,
         "industry": null,
         "industry_source": null,
-        "close": 1.9216,
-        "price_date": "2026-11-26",
+        "close": 2.0334,
+        "price_date": "2026-11-27",
         "price_gap": false,
         "fx_gap": false,
-        "market_value": 160699.28
+        "market_value": 170048.87
       }
     ],
     "fees": {
@@ -2332,12 +2570,12 @@
   "risk": {
     "schema": "risk-v1",
     "display_only": true,
-    "asof": "2026-11-26",
+    "asof": "2026-11-27",
     "note": "超线只展示，不改规则，不自动调仓。不模拟融资。",
     "band_note": "区间按战略权重和允许带宽计算。本仪表不因此下单；既有收盘越界再平衡仍只按原规则执行。",
     "drawdown": {
-      "current_signed": -0.03440411600000004,
-      "magnitude": 0.03440411600000004,
+      "current_signed": -0.023772261999999933,
+      "magnitude": 0.023772261999999933,
       "enabled": true,
       "levels": [
         {
@@ -2345,7 +2583,7 @@
           "action": "warn",
           "note": "仅预警，不调仓",
           "targets": null,
-          "distance": 0.06559588399999997,
+          "distance": 0.07622773800000007,
           "reached": false
         },
         {
@@ -2356,7 +2594,7 @@
             "fire": 0.15,
             "feng": 0.15
           },
-          "distance": 0.11559588399999995,
+          "distance": 0.12622773800000006,
           "reached": false
         },
         {
@@ -2367,7 +2605,7 @@
             "fire": 0.05,
             "feng": 0.1
           },
-          "distance": 0.16559588399999997,
+          "distance": 0.17622773800000008,
           "reached": false
         }
       ],
@@ -2394,12 +2632,12 @@
         "band": 0.05,
         "low": 0.25,
         "high": 0.35,
-        "weight": 0.28807545124125655,
+        "weight": 0.29163715485412683,
         "action": "仅展示",
         "inside": true,
         "status": "区间内",
-        "distance_to_low": 0.03807545124125655,
-        "distance_to_high": 0.061924548758743425,
+        "distance_to_low": 0.041637154854126834,
+        "distance_to_high": 0.05836284514587314,
         "id": "shan",
         "name": "五绝归山",
         "board": "山部",
@@ -2410,12 +2648,12 @@
         "band": 0.05,
         "low": 0.25,
         "high": 0.35,
-        "weight": 0.3106889796974321,
+        "weight": 0.3073053431309078,
         "action": "仅展示",
         "inside": true,
         "status": "区间内",
-        "distance_to_low": 0.06068897969743209,
-        "distance_to_high": 0.03931102030256789,
+        "distance_to_low": 0.05730534313090779,
+        "distance_to_high": 0.042694656869092185,
         "id": "fire",
         "name": "四王盗火",
         "board": "火部",
@@ -2426,12 +2664,12 @@
         "band": 0.05,
         "low": 0.15000000000000002,
         "high": 0.25,
-        "weight": 0.1978903153650974,
+        "weight": 0.19757526496343006,
         "action": "仅展示",
         "inside": true,
         "status": "区间内",
-        "distance_to_low": 0.047890315365097386,
-        "distance_to_high": 0.05210968463490259,
+        "distance_to_low": 0.047575264963430036,
+        "distance_to_high": 0.05242473503656994,
         "id": "feng",
         "name": "八友御风",
         "board": "风部",
@@ -2442,12 +2680,12 @@
         "band": 0.05,
         "low": 0.15000000000000002,
         "high": 0.25,
-        "weight": 0.20334525369621398,
+        "weight": 0.20348223705153518,
         "action": "仅展示",
         "inside": true,
         "status": "区间内",
-        "distance_to_low": 0.05334525369621396,
-        "distance_to_high": 0.04665474630378602,
+        "distance_to_low": 0.05348223705153515,
+        "distance_to_high": 0.046517762948464825,
         "id": "lin",
         "name": "六仙出林",
         "board": "林部",
@@ -2470,8 +2708,8 @@
       "rows": [
         {
           "industry": "农业",
-          "market_value": 118150.0,
-          "weight_of_total": 0.024471935300834403,
+          "market_value": 119340.0,
+          "weight_of_total": 0.024449213099495024,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2486,8 +2724,8 @@
         },
         {
           "industry": "家电",
-          "market_value": 121185.2,
-          "weight_of_total": 0.025100604094952832,
+          "market_value": 124511.5,
+          "weight_of_total": 0.02550869948749602,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2502,8 +2740,8 @@
         },
         {
           "industry": "消费",
-          "market_value": 118849.5,
-          "weight_of_total": 0.02461681992836664,
+          "market_value": 119192.5,
+          "weight_of_total": 0.02441899474075382,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2518,8 +2756,8 @@
         },
         {
           "industry": "白酒",
-          "market_value": 120228.0,
-          "weight_of_total": 0.024902343100708577,
+          "market_value": 122185.2,
+          "weight_of_total": 0.02503210987434573,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2534,8 +2772,8 @@
         },
         {
           "industry": "石油/能源",
-          "market_value": 119439.6,
-          "weight_of_total": 0.02473904497297961,
+          "market_value": 118448.4,
+          "weight_of_total": 0.024266550803538012,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2550,8 +2788,8 @@
         },
         {
           "industry": "红利",
-          "market_value": 119585.7,
-          "weight_of_total": 0.024769306079602135,
+          "market_value": 119164.5,
+          "weight_of_total": 0.02441325837434871,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2566,8 +2804,8 @@
         },
         {
           "industry": "银行",
-          "market_value": 120602.7,
-          "weight_of_total": 0.024979953207836997,
+          "market_value": 118781.3,
+          "weight_of_total": 0.0243347521026902,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2582,8 +2820,8 @@
         },
         {
           "industry": "非银",
-          "market_value": 116718.0,
-          "weight_of_total": 0.024175330888216585,
+          "market_value": 122117.2,
+          "weight_of_total": 0.025018178698790465,
           "limit": 0.3,
           "status": "未接近",
           "positions": [
@@ -2604,7 +2842,7 @@
           "code": "03998",
           "name": "波司登",
           "kind": "hk_stock",
-          "market_value": 324603.53,
+          "market_value": 326077.33,
           "reason": "行业分类缺失"
         },
         {
@@ -2613,7 +2851,7 @@
           "code": "06862",
           "name": "海底捞",
           "kind": "hk_stock",
-          "market_value": 311847.65,
+          "market_value": 314428.91,
           "reason": "行业分类缺失"
         },
         {
@@ -2622,7 +2860,7 @@
           "code": "300750",
           "name": "宁德时代",
           "kind": "ashare_stock",
-          "market_value": 285908.0,
+          "market_value": 302246.0,
           "reason": "行业分类缺失"
         },
         {
@@ -2631,7 +2869,7 @@
           "code": "601528",
           "name": "瑞丰银行",
           "kind": "ashare_stock",
-          "market_value": 143108.0,
+          "market_value": 142044.0,
           "reason": "行业分类缺失"
         },
         {
@@ -2640,7 +2878,7 @@
           "code": "603605",
           "name": "珀莱雅",
           "kind": "ashare_stock",
-          "market_value": 321580.0,
+          "market_value": 334950.0,
           "reason": "行业分类缺失"
         },
         {
@@ -2658,7 +2896,7 @@
           "code": "160613",
           "name": "鹏华盛世创新混合(LOF)A",
           "kind": "fund",
-          "market_value": 258036.54,
+          "market_value": 259350.39,
           "reason": "行业分类缺失"
         },
         {
@@ -2667,7 +2905,7 @@
           "code": "202019",
           "name": "南方策略优化混合",
           "kind": "fund",
-          "market_value": 160699.28,
+          "market_value": 170048.87,
           "reason": "行业分类缺失"
         }
       ],
@@ -2676,8 +2914,8 @@
       "action": "仅报告，不强制调仓"
     },
     "freshness": {
-      "asof": "2026-11-26",
-      "updated_at": "2026-11-27 03:22",
+      "asof": "2026-11-27",
+      "updated_at": "2026-11-28 03:16",
       "lagging": [
         {
           "sleeve": "lin",
@@ -2709,12 +2947,13 @@
     "tencent-kline",
     "tencent-kline",
     "tencent-fx-spot",
-    "tencent-kline",
+    "eastmoney-kline",
+    "eastmoney-kline",
     "shan latest.fx"
   ],
   "gaps": [
     {
-      "date": "2026-11-26",
+      "date": "2026-11-27",
       "reason": "部分持仓缺当日价格，已沿用最近收盘"
     },
     {
@@ -2733,10 +2972,7 @@
       "reason": "场外基金没有行业持仓明细，不把投资风格当成行业，不计入行业占比。"
     },
     {
-      "reason": "沪深300全收益暂不可用，已改用 腾讯 sh000300 沪深300价格指数。短窗口分红差可忽略，长窗口会低估基准。"
-    },
-    {
-      "reason": "基准 中证偏股基金指数 缺失: em 90.930950: 请求失败 https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=90.930950&fields1=f1,f2,f3&fields2=f51,f52,f53,f54,f55&klt=101&fqt=1&end=20500101&lmt=120&ut=fa5fd1943c7b386f172d6893dbfba10b: Remote end closed connection without response; em 1.930950: 请求失败 https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.930950&fields1=f1,f2,f3&fields2=f51,f52,f53,f54,f55&klt=101&fqt=1&end=20500101&lmt=120&ut=fa5fd1943c7b386f172d6893dbfba10b: Remote end closed connection without response"
+      "reason": "沪深300全收益暂不可用，已改用 000300 沪深300价格指数。短窗口分红差可忽略，长窗口会低估基准。"
     },
     {
       "reason": "火部 paper.json 虚拟资金为 1000000 元，总账户按目标权重使用 1500000 元，未按比例放大其持仓，而是按正式名单自行记账。"
@@ -2746,7 +2982,7 @@
   "pending_sleeve": {
     "shan": false,
     "fire": false,
-    "feng": false,
+    "feng": true,
     "lin": false
   }
 }

@@ -1,10 +1,68 @@
 {
   "disclaimer": "模拟盘，非投资建议。虚拟资金，不接券商，不动真钱。",
-  "updated_at": "2026-11-27 03:22",
-  "asof": "2026-11-26",
+  "updated_at": "2026-11-28 03:16",
+  "asof": "2026-11-27",
   "started": true,
-  "has_changes": false,
-  "kinds": [],
-  "logs": [],
+  "has_changes": true,
+  "kinds": [
+    "子组合调仓"
+  ],
+  "logs": [
+    {
+      "date": "2026-11-27",
+      "type": "sleeve_trade",
+      "sleeve": "feng",
+      "status": "signal",
+      "reason": "正式名单",
+      "changes": [
+        "医药ETF(86.4) 替换 能源ETF(22.9)",
+        "证券ETF(67.5) 替换 红利ETF(42.5)",
+        "半导体ETF(57.5) 替换 农业ETF(47.5)"
+      ],
+      "holdings": [
+        {
+          "code": "512010",
+          "name": "医药ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159996",
+          "name": "家电ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512070",
+          "name": "证券保险ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512800",
+          "name": "银行ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "159928",
+          "name": "消费ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512880",
+          "name": "证券ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512690",
+          "name": "酒ETF",
+          "weight": 12.5
+        },
+        {
+          "code": "512480",
+          "name": "半导体ETF",
+          "weight": 12.5
+        }
+      ],
+      "excluded": []
+    }
+  ],
   "trades": []
 }
